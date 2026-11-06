@@ -57,15 +57,15 @@
 </head>
 <body>
 <header class="hero">
-  <div class="eyebrow">Java 웹 &amp; Spring Boot · 종합 프로젝트 · 학습 교안 2강 (단원 11~19)</div>
+  <div class="eyebrow">Java 웹 &amp; Spring Boot · 종합 프로젝트 · 학습 교안 2강 (단원 9~17)</div>
   <h1>2강. 화면 · 이미지 업로드 · AI · 로그인 · 배포</h1>
   <p>Thymeleaf 화면과 fetch 연동 → 이미지 업로드 → Spring AI 글쓰기 도우미 → Spring Security · JWT → 테스트 · AWS 배포 · 확장 과제</p>
   <div class="tags"><span>🍃 Thymeleaf</span><span>🖼️ 파일 업로드</span><span>🤖 Spring AI</span><span>🔐 Spring Security</span><span>🔑 JWT</span><span>☁️ AWS</span></div>
 </header>
 <div class="wrap">
   <p style="margin:0 0 16px"><a href="blog-lecture-1.html">← 1강. 설계부터 REST API 백엔드까지</a></p>
-  <nav class="toc"><h2>📚 학습 목차</h2><ol start="11"><li><a href="#m11">Thymeleaf 화면 구성</a></li><li><a href="#m12">프론트엔드 JS — fetch로 API 호출</a></li><li><a href="#m13">이미지 업로드</a></li><li><a href="#m14">Spring AI — AI 글쓰기 도우미</a></li><li><a href="#m15">Spring Security — 회원가입 · 로그인</a></li><li><a href="#m16">JWT 토큰 (TokenProvider)</a></li><li><a href="#m17">실행 &amp; 테스트</a></li><li><a href="#m18">운영 배포 (AWS Elastic Beanstalk + RDS)</a></li><li><a href="#m19">실습문제 (확장 과제)</a></li></ol></nav>
-  <section class="module" id="m11"><h2><span class="num">11</span> Thymeleaf 화면 구성</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>@Controller</code>에서 Model에 데이터를 담아 템플릿으로 넘길 수 있다.</li><li><code>th:text</code> · <code>th:each</code> · <code>th:if</code> · <code>@{...}</code> 문법을 사용할 수 있다.</li></ul></div><div class="concept"><h3 class="blk">📖 자주 쓰는 Thymeleaf 문법 (example.html로 연습)</h3><table>
+  <nav class="toc"><h2>📚 학습 목차</h2><ol start="9"><li><a href="#m9">Thymeleaf 화면 구성</a></li><li><a href="#m10">프론트엔드 JS — fetch로 API 호출</a></li><li><a href="#m11">이미지 업로드</a></li><li><a href="#m12">Spring AI — AI 글쓰기 도우미</a></li><li><a href="#m13">Spring Security — 회원가입 · 로그인</a></li><li><a href="#m14">JWT 토큰 (TokenProvider)</a></li><li><a href="#m15">실행 &amp; 테스트</a></li><li><a href="#m16">운영 배포 (AWS Elastic Beanstalk + RDS)</a></li><li><a href="#m17">실습문제 (확장 과제)</a></li></ol></nav>
+  <section class="module" id="m9"><h2><span class="num">9</span> Thymeleaf 화면 구성</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>@Controller</code>에서 Model에 데이터를 담아 템플릿으로 넘길 수 있다.</li><li><code>th:text</code> · <code>th:each</code> · <code>th:if</code> · <code>@{...}</code> 문법을 사용할 수 있다.</li></ul></div><div class="concept"><h3 class="blk">📖 자주 쓰는 Thymeleaf 문법 (example.html로 연습)</h3><table>
 <tr><th>문법</th><th>의미</th><th>예</th></tr>
 <tr><td><code>${...}</code></td><td>모델 값 꺼내기</td><td><code>th:text="${article.title}"</code></td></tr>
 <tr><td><code>*{...}</code></td><td><code>th:object</code>로 선택한 객체의 필드</td><td><code>th:text="*{name}"</code></td></tr>
@@ -128,7 +128,7 @@
 <span class="g">&lt;button</span> <span class="a">th:if</span>=<span class="s">"${article.id} != null"</span> <span class="a">id</span>=<span class="s">"modify-btn"</span> <span class="a">class</span>=<span class="s">"btn btn-primary btn-sm"</span><span class="g">&gt;</span>수정<span class="g">&lt;/button</span><span class="g">&gt;</span>
 <span class="g">&lt;button</span> <span class="a">th:if</span>=<span class="s">"${article.id} == null"</span> <span class="a">id</span>=<span class="s">"create-btn"</span> <span class="a">class</span>=<span class="s">"btn btn-primary btn-sm"</span><span class="g">&gt;</span>등록<span class="g">&lt;/button</span><span class="g">&gt;</span>
 
-<span class="g">&lt;script</span> <span class="a">src</span>=<span class="s">"/js/article.js"</span><span class="g">&gt;</span><span class="g">&lt;/script</span><span class="g">&gt;</span></pre></div></section><section class="module" id="m12"><h2><span class="num">12</span> 프론트엔드 JS — fetch로 API 호출</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>fetch()</code>로 REST API를 호출하고 결과에 따라 페이지를 이동시킬 수 있다.</li></ul></div><div class="concept"><h3 class="blk">📖 개념 및 설명</h3><p><code>static/js/article.js</code> 한 파일이 모든 화면에 포함된다. 버튼이 <b>있는 화면에서만</b> 이벤트를 등록하도록 <code>if (button)</code>으로 감싼다.</p>
+<span class="g">&lt;script</span> <span class="a">src</span>=<span class="s">"/js/article.js"</span><span class="g">&gt;</span><span class="g">&lt;/script</span><span class="g">&gt;</span></pre></div></section><section class="module" id="m10"><h2><span class="num">10</span> 프론트엔드 JS — fetch로 API 호출</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>fetch()</code>로 REST API를 호출하고 결과에 따라 페이지를 이동시킬 수 있다.</li></ul></div><div class="concept"><h3 class="blk">📖 개념 및 설명</h3><p><code>static/js/article.js</code> 한 파일이 모든 화면에 포함된다. 버튼이 <b>있는 화면에서만</b> 이벤트를 등록하도록 <code>if (button)</code>으로 감싼다.</p>
 <div class="flow"><span class="box">버튼 클릭</span><span class="arr">→</span><span class="box">fetch(URL, {method, body})</span><span class="arr">→</span><span class="box">API 응답</span><span class="arr">→</span><span class="box">alert + location.replace()</span></div></div><div class="ex"><div class="lbl">💡 static/js/article.js — 등록 · 수정 · 삭제</div><pre><span class="c">// 등록</span>
 <span class="k">const</span> createButton = document.<span class="f">getElementById</span>(<span class="s">'create-btn'</span>);
 <span class="k">if</span> (createButton) {
@@ -179,7 +179,7 @@
                 location.<span class="f">replace</span>(<span class="s">'/articles'</span>);
             });
     });
-}</pre><div class="warn"><span class="lbl">⚠️ 현재 프로젝트 점검</span> — 프로젝트의 <code>article.js</code> 수정 기능에는 <code>imageUrl</code>이 빠져 있어, 글을 수정하면 <code>update()</code>가 이미지 경로를 <code>null</code>로 덮어쓴다. 위 코드처럼 추가하자.</div></div></section><section class="module" id="m13"><h2><span class="num">13</span> 이미지 업로드</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>MultipartFile</code>로 파일을 받아 서버에 저장하고 URL로 제공할 수 있다.</li><li>저장 방식을 인터페이스로 추상화하는 이유를 이해한다.</li></ul></div><div class="concept"><h3 class="blk">📖 업로드 흐름</h3><div class="flow"><span class="box">파일 선택</span><span class="arr">→</span><span class="box">POST /api/upload (FormData)</span><span class="arr">→</span><span class="box">uploads/UUID.jpg 저장</span><span class="arr">→</span><span class="box">{imageUrl} 응답</span><span class="arr">→</span><span class="box">hidden input 저장 + 미리보기</span><span class="arr">→</span><span class="box">글 등록 시 함께 전송</span></div>
+}</pre><div class="warn"><span class="lbl">⚠️ 현재 프로젝트 점검</span> — 프로젝트의 <code>article.js</code> 수정 기능에는 <code>imageUrl</code>이 빠져 있어, 글을 수정하면 <code>update()</code>가 이미지 경로를 <code>null</code>로 덮어쓴다. 위 코드처럼 추가하자.</div></div></section><section class="module" id="m11"><h2><span class="num">11</span> 이미지 업로드</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>MultipartFile</code>로 파일을 받아 서버에 저장하고 URL로 제공할 수 있다.</li><li>저장 방식을 인터페이스로 추상화하는 이유를 이해한다.</li></ul></div><div class="concept"><h3 class="blk">📖 업로드 흐름</h3><div class="flow"><span class="box">파일 선택</span><span class="arr">→</span><span class="box">POST /api/upload (FormData)</span><span class="arr">→</span><span class="box">uploads/UUID.jpg 저장</span><span class="arr">→</span><span class="box">{imageUrl} 응답</span><span class="arr">→</span><span class="box">hidden input 저장 + 미리보기</span><span class="arr">→</span><span class="box">글 등록 시 함께 전송</span></div>
 <ul>
 <li>파일명은 <b>UUID</b>로 바꿔 저장한다 → 이름 충돌·한글 파일명 문제 방지</li>
 <li><code>FileStorageService</code> 인터페이스 덕분에 나중에 <b>S3 저장소</b>로 바꿀 때 컨트롤러는 그대로 둔다.</li>
@@ -257,7 +257,7 @@
             })
             .<span class="k">catch</span>(e =&gt; <span class="f">alert</span>(e.message));
     });
-}</pre></div></section><section class="module" id="m14"><h2><span class="num">14</span> Spring AI — AI 글쓰기 도우미</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>프롬프트 템플릿(<code>.st</code>)에 값을 채워 LLM에 보낼 수 있다.</li><li><code>BeanOutputConverter</code>로 LLM의 답을 자바 객체로 받을 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — Spring AI 의존성 추가 (1강에서 빼 둔 Google GenAI)</div><pre><span class="k">repositories</span> {
+}</pre></div></section><section class="module" id="m12"><h2><span class="num">12</span> Spring AI — AI 글쓰기 도우미</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>프롬프트 템플릿(<code>.st</code>)에 값을 채워 LLM에 보낼 수 있다.</li><li><code>BeanOutputConverter</code>로 LLM의 답을 자바 객체로 받을 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — Spring AI 의존성 추가 (1강에서 빼 둔 Google GenAI)</div><pre><span class="k">repositories</span> {
     <span class="k">mavenCentral</span>()
     <span class="k">maven</span> { <span class="k">url</span> <span class="s">'https://repo.spring.io/milestone'</span> }   <span class="c">// Spring AI 마일스톤 버전용</span>
 }
@@ -267,7 +267,7 @@
     <span class="k">implementation</span> <span class="k">platform</span>(<span class="s">'org.springframework.ai:spring-ai-bom:2.0.0-M1'</span>)
     <span class="k">implementation</span> <span class="s">'org.springframework.ai:spring-ai-starter-model-google-genai'</span>
 }</pre></div><div class="ex"><div class="lbl">💡 application.yaml — spring: 아래에 AI 설정 추가</div><pre><span class="g">spring</span>:
-  <span class="c"># ... 1강 설정(application, jpa, sql, datasource, h2) 그대로 ...</span>
+  <span class="c"># ... 1강 설정(application, jpa, sql, datasource) 그대로 ...</span>
   <span class="g">ai</span>:
     <span class="g">google</span>:
       <span class="g">genai</span>:
@@ -325,7 +325,7 @@
 $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
 .\gradlew bootRun
 
-<span class="c"># IntelliJ: Run → Edit Configurations → Environment variables 에 GEMINI_API_KEY=... 추가</span></pre><div class="note"><span class="lbl">💡 AI 썸네일 생성은?</span> — <code>ThumbnailGeneratorService</code>(이미지 생성)도 만들었지만, Spring AI <b>2.0.0-M1</b>의 google-genai 스타터는 <code>ImageModel</code>을 제공하지 않는다. <code>@Service</code>를 켜면 빈이 없어 <b>앱이 시작되지 않으므로</b> 주석 처리해 두었다. 지원 버전이 나오면 의존성 추가 → <code>@Service</code>와 <code>/api/ai-thumbnails</code>를 되살린다.</div></div></section><section class="module" id="m15"><h2><span class="num">15</span> Spring Security — 회원가입 · 로그인</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>UserDetails</code> / <code>UserDetailsService</code>를 구현해 DB 회원으로 로그인할 수 있다.</li><li><code>SecurityFilterChain</code>으로 공개 URL과 인증 필요 URL을 나눌 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — Spring Security 의존성 추가 (1강에서 빼 둔 Spring Security)</div><pre><span class="k">dependencies</span> {
+<span class="c"># IntelliJ: Run → Edit Configurations → Environment variables 에 GEMINI_API_KEY=... 추가</span></pre><div class="note"><span class="lbl">💡 AI 썸네일 생성은?</span> — <code>ThumbnailGeneratorService</code>(이미지 생성)도 만들었지만, Spring AI <b>2.0.0-M1</b>의 google-genai 스타터는 <code>ImageModel</code>을 제공하지 않는다. <code>@Service</code>를 켜면 빈이 없어 <b>앱이 시작되지 않으므로</b> 주석 처리해 두었다. 지원 버전이 나오면 의존성 추가 → <code>@Service</code>와 <code>/api/ai-thumbnails</code>를 되살린다.</div></div></section><section class="module" id="m13"><h2><span class="num">13</span> Spring Security — 회원가입 · 로그인</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>UserDetails</code> / <code>UserDetailsService</code>를 구현해 DB 회원으로 로그인할 수 있다.</li><li><code>SecurityFilterChain</code>으로 공개 URL과 인증 필요 URL을 나눌 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — Spring Security 의존성 추가 (1강에서 빼 둔 Spring Security)</div><pre><span class="k">dependencies</span> {
     <span class="c">// 보안</span>
     <span class="k">implementation</span> <span class="s">'org.springframework.boot:spring-boot-starter-security'</span>
     <span class="k">implementation</span> <span class="s">'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'</span>
@@ -397,7 +397,6 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
     <span class="a">@Bean</span>
     <span class="k">public</span> <span class="t">WebSecurityCustomizer</span> <span class="f">configure</span>() {
         <span class="k">return</span> web -&gt; web.<span class="f">ignoring</span>()
-                .<span class="f">requestMatchers</span>(<span class="s">"/h2-console/**"</span>)   <span class="c">// toH2Console() 대신 경로 문자열</span>
                 .<span class="f">requestMatchers</span>(<span class="s">"/static/**"</span>);
     }
 
@@ -421,7 +420,7 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
     <span class="k">public</span> <span class="t">PasswordEncoder</span> <span class="f">passwordEncoder</span>() {
         <span class="k">return</span> <span class="k">new</span> <span class="f">BCryptPasswordEncoder</span>();
     }
-}</pre><div class="warn"><span class="lbl">⚠️ toH2Console() 주의</span> — <code>PathRequest.toH2Console()</code>은 <code>H2ConsoleProperties</code> 빈을 찾는다. 운영(prod)에서 H2 콘솔을 끄면 빈이 없어 <b>모든 요청이 500 에러</b>가 난다. 경로 문자열 <code>"/h2-console/**"</code>을 쓰자. (현재 프로젝트 코드는 아직 <code>toH2Console()</code>을 쓰고 있다.)</div></div><div class="ex"><div class="lbl">💡 controller/UserApiController.java — 회원가입 · 로그아웃</div><pre><span class="a">@RequiredArgsConstructor</span>
+}</pre></div><div class="ex"><div class="lbl">💡 controller/UserApiController.java — 회원가입 · 로그아웃</div><pre><span class="a">@RequiredArgsConstructor</span>
 <span class="a">@Controller</span>
 <span class="k">public</span> <span class="k">class</span> <span class="t">UserApiController</span> {
     <span class="k">private</span> <span class="k">final</span> <span class="t">UserService</span> userService;
@@ -438,7 +437,7 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
                 <span class="t">SecurityContextHolder</span>.<span class="f">getContext</span>().<span class="f">getAuthentication</span>());
         <span class="k">return</span> <span class="s">"redirect:/login"</span>;
     }
-}</pre></div></section><section class="module" id="m16"><h2><span class="num">16</span> JWT 토큰 (TokenProvider)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>JWT의 구조(헤더·페이로드·서명)와 발급·검증 과정을 이해한다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — JWT 의존성 추가</div><pre><span class="k">dependencies</span> {
+}</pre></div></section><section class="module" id="m14"><h2><span class="num">14</span> JWT 토큰 (TokenProvider)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>JWT의 구조(헤더·페이로드·서명)와 발급·검증 과정을 이해한다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — JWT 의존성 추가</div><pre><span class="k">dependencies</span> {
     <span class="k">implementation</span> <span class="s">'io.jsonwebtoken:jjwt:0.9.1'</span>
     <span class="k">implementation</span> <span class="s">'javax.xml.bind:jaxb-api:2.3.1'</span>   <span class="c">// jjwt 0.9.x는 Java 11+에서 필요</span>
 }</pre></div><div class="ex"><div class="lbl">💡 application.yaml — 최상위에 JWT 설정 추가</div><pre><span class="c"># JWT 설정은 spring: 아래가 아니라 최상위에 둔다 (@ConfigurationProperties("jwt"))</span>
@@ -504,12 +503,12 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
         <span class="k">return</span> <span class="t">Jwts</span>.<span class="f">parser</span>().<span class="f">setSigningKey</span>(jwtProperties.<span class="f">getSecretKey</span>())
                 .<span class="f">parseClaimsJws</span>(token).<span class="f">getBody</span>();
     }
-}</pre></div></section><section class="module" id="m17"><h2><span class="num">17</span> 실행 &amp; 테스트</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>브라우저와 curl로 화면·API를 테스트하고 JSON 응답을 확인할 수 있다.</li></ul></div><div class="concept"><h3 class="blk">▶ 실행 순서</h3><ol>
-<li><code>.\gradlew bootRun</code> (또는 IntelliJ에서 <code>BlogWebApplication</code> 실행)</li>
+}</pre></div></section><section class="module" id="m15"><h2><span class="num">15</span> 실행 &amp; 테스트</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>브라우저와 curl로 화면·API를 테스트하고 JSON 응답을 확인할 수 있다.</li></ul></div><div class="concept"><h3 class="blk">▶ 실행 순서</h3><ol>
+<li><code>.\gradlew bootRun</code> (또는 IntelliJ에서 <code>BlogwebApplication</code> 실행)</li>
 <li><code>http://localhost:8080/signup</code> → 회원가입</li>
 <li><code>http://localhost:8080/login</code> → 로그인 → <code>/articles</code> 목록 (샘플 글 3개)</li>
 <li>글 등록(이미지·AI 도우미 포함) → 상세 → 수정 → 삭제</li>
-<li>H2 콘솔: <code>http://localhost:8080/h2-console</code> (JDBC URL <code>jdbc:h2:mem:testdb</code>, 사용자 <code>sa</code>)</li>
+<li>DB 확인: MySQL Workbench에서 <code>SELECT * FROM springdb.article;</code>, <code>SELECT * FROM springdb.users;</code></li>
 </ol></div><div class="note"><span class="lbl">💡 API 테스트 전에</span> — 모든 API가 <b>로그인 필요</b>다. Postman/curl로 호출하려면 먼저 <code>/login</code>에 폼 로그인해 받은 <b>세션 쿠키(JSESSIONID)</b>를 함께 보내야 한다. 로그인 없이 호출하면 로그인 페이지(302)로 리다이렉트된다.</div><div class="ex"><div class="lbl">💡 ① 로그인해서 쿠키 저장 — <span class="method m-post">POST</span> /login</div><pre>curl -c cookie.txt -d <span class="s">"username=test@test.com&amp;password=1234"</span> http://localhost:8080/login</pre></div><div class="ex"><div class="lbl">💡 ② 글 등록 — <span class="method m-post">POST</span> /api/articles</div><pre>curl -b cookie.txt -X POST http://localhost:8080/api/articles \
      -H <span class="s">"Content-Type: application/json"</span> \
      -d <span class="s">'{"title":"첫 글","content":"Spring Boot 블로그","imageUrl":null}'</span></pre><div class="out">HTTP 201 Created
@@ -533,13 +532,13 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
     &quot;직접 겪은 오류와 해결 과정을 정리해 보세요.&quot;
   ]
 }</div></div><div class="ex"><div class="lbl">💡 ⑥ 없는 글 조회 (에러) — <span class="method m-get">GET</span> /api/articles/999</div><pre>curl -b cookie.txt http://localhost:8080/api/articles/999</pre><div class="out" style="color:#ff9b9b">HTTP 500 Internal Server Error
-(IllegalArgumentException: not found: 999)</div><p class="muted" style="margin-top:8px">예외 처리기가 없어서 500이 난다. 실습 1에서 <code>@RestControllerAdvice</code>로 <b>404 + JSON 메시지</b>로 바꿔 보자.</p></div><div class="concept"><h3 class="blk">📁 완성 프로젝트 폴더 구조</h3><pre>blog-web/
+(IllegalArgumentException: not found: 999)</div><p class="muted" style="margin-top:8px">예외 처리기가 없어서 500이 난다. 실습 1에서 <code>@RestControllerAdvice</code>로 <b>404 + JSON 메시지</b>로 바꿔 보자.</p></div><div class="concept"><h3 class="blk">📁 완성 프로젝트 폴더 구조</h3><pre>blogweb/
 ├─ build.gradle · settings.gradle · gradlew(.bat)
 ├─ DEPLOY.md                         # AWS 배포 가이드
 ├─ uploads/                          # 업로드 이미지 저장
 └─ src/main/
-   ├─ java/com/space/blogweb/
-   │  ├─ BlogWebApplication.java              # main + @EnableJpaAuditing
+   ├─ java/com/sudo/blogweb/
+   │  ├─ BlogwebApplication.java              # main + @EnableJpaAuditing
    │  ├─ config/                           # WebMvcConfig, WebSecurityConfig, jwt/
    │  ├─ controller/                       # BlogApi, BlogView, Upload, UserApi, UserView
    │  ├─ domain/                           # Article, User (@Entity)
@@ -550,7 +549,7 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
       ├─ application.yaml · application-prod.yaml · data.sql
       ├─ prompts/writing-assistant.st
       ├─ static/js/article.js
-      └─ templates/                        # articleList, article, newArticle, login, signup</pre></div></section><section class="module" id="m18"><h2><span class="num">18</span> 운영 배포 (AWS Elastic Beanstalk + RDS)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>프로파일(prod)로 로컬(H2)과 운영(MySQL) 설정을 분리할 수 있다.</li><li>JAR를 빌드해 Elastic Beanstalk에 배포하는 순서를 설명할 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 application-prod.yaml — SPRING_PROFILES_ACTIVE=prod 일 때 적용</div><pre><span class="g">spring</span>:
+      └─ templates/                        # articleList, article, newArticle, login, signup</pre></div></section><section class="module" id="m16"><h2><span class="num">16</span> 운영 배포 (AWS Elastic Beanstalk + RDS)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>프로파일(prod)로 로컬 MySQL과 운영 RDS(MySQL) 접속 정보를 분리할 수 있다.</li><li>JAR를 빌드해 Elastic Beanstalk에 배포하는 순서를 설명할 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 application-prod.yaml — SPRING_PROFILES_ACTIVE=prod 일 때 적용</div><pre><span class="g">spring</span>:
   <span class="g">datasource</span>:
     <span class="g">url</span>: jdbc:mysql://<span class="n">${RDS_HOSTNAME}</span>:<span class="n">${RDS_PORT}</span>/<span class="n">${RDS_DB_NAME}</span>?useSSL=<span class="k">false</span>&amp;serverTimezone=UTC
     <span class="g">username</span>: <span class="n">${RDS_USERNAME}</span>
@@ -562,24 +561,20 @@ $env:GEMINI_API_KEY=<span class="s">"발급받은_키"</span>
     <span class="g">show-sql</span>: <span class="k">false</span>
   <span class="g">sql</span>:
     <span class="g">init</span>:
-      <span class="g">mode</span>: <span class="k">never</span>             <span class="c"># data.sql은 로컬 전용</span>
-  <span class="g">h2</span>:
-    <span class="g">console</span>:
-      <span class="g">enabled</span>: <span class="k">false</span></pre></div><div class="concept"><h3 class="blk">📖 배포 순서 요약</h3><table>
+      <span class="g">mode</span>: <span class="k">never</span>             <span class="c"># data.sql은 로컬 전용</span></pre></div><div class="concept"><h3 class="blk">📖 배포 순서 요약</h3><table>
 <tr><th>#</th><th>작업</th><th>포인트</th></tr>
-<tr><td>1</td><td>RDS(MySQL) 생성</td><td>프리 티어, <b>초기 DB 이름 <code>blogdb</code></b> 입력</td></tr>
+<tr><td>1</td><td>RDS(MySQL) 생성</td><td>프리 티어, <b>초기 DB 이름 <code>springdb</code></b> 입력</td></tr>
 <tr><td>2</td><td>보안 그룹</td><td>RDS 인바운드 3306 ← EB 보안 그룹 허용</td></tr>
 <tr><td>3</td><td>EB 환경변수</td><td><code>SPRING_PROFILES_ACTIVE=prod</code>, <code>RDS_*</code>, <code>SERVER_PORT=5000</code>, <code>GEMINI_API_KEY</code></td></tr>
-<tr><td>4</td><td>빌드</td><td><code>.\gradlew clean bootJar</code> → <code>build/libs/blog-web-0.0.1-SNAPSHOT.jar</code></td></tr>
+<tr><td>4</td><td>빌드</td><td><code>.\gradlew clean bootJar</code> → <code>build/libs/blogweb-0.0.1-SNAPSHOT.jar</code></td></tr>
 <tr><td>5</td><td>업로드 · 배포</td><td>EB 콘솔 → 업로드 및 배포 → 상태 Ok 확인</td></tr>
 </table>
 <table>
 <tr><th>증상</th><th>원인 → 해결</th></tr>
 <tr><td>502 Bad Gateway</td><td>앱이 8080에서 뜸 → <code>SERVER_PORT=5000</code></td></tr>
-<tr><td>모든 요청 500</td><td><code>toH2Console()</code> → <code>"/h2-console/**"</code></td></tr>
 <tr><td>연결 타임아웃</td><td>RDS 보안 그룹 3306 미허용</td></tr>
 <tr><td>고쳤는데 그대로</td><td>예전 JAR 업로드 → <code>clean</code> 후 JAR 수정 시각 확인</td></tr>
-</table><div class="note"><span class="lbl">💡 자세한 내용</span> — 프로젝트의 <code>DEPLOY.md</code>에 RDS 생성, 보안 그룹, GitHub Actions 자동 배포까지 단계별로 정리되어 있다. 업로드 이미지(<code>uploads/</code>)는 EB 인스턴스가 교체되면 사라지므로 운영에서는 S3를 검토한다.</div></div></section><section class="module" id="m19"><h2><span class="num">19</span> 실습문제 (확장 과제)</h2><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 1. 전역 예외 처리 (@RestControllerAdvice)</h4><p>없는 글을 조회·수정할 때 500 대신 <b>404 Not Found</b>와 <code>{"error":"not found: 999"}</code>를 돌려주도록 <code>GlobalExceptionHandler</code>를 만드세요.</p><details><summary>힌트 보기</summary><pre><span class="a">@RestControllerAdvice</span>   <span class="c">// 모든 컨트롤러의 예외를 여기서 처리</span>
+</table><div class="note"><span class="lbl">💡 자세한 내용</span> — 프로젝트의 <code>DEPLOY.md</code>에 RDS 생성, 보안 그룹, GitHub Actions 자동 배포까지 단계별로 정리되어 있다. 업로드 이미지(<code>uploads/</code>)는 EB 인스턴스가 교체되면 사라지므로 운영에서는 S3를 검토한다.</div></div></section><section class="module" id="m17"><h2><span class="num">17</span> 실습문제 (확장 과제)</h2><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 1. 전역 예외 처리 (@RestControllerAdvice)</h4><p>없는 글을 조회·수정할 때 500 대신 <b>404 Not Found</b>와 <code>{"error":"not found: 999"}</code>를 돌려주도록 <code>GlobalExceptionHandler</code>를 만드세요.</p><details><summary>힌트 보기</summary><pre><span class="a">@RestControllerAdvice</span>   <span class="c">// 모든 컨트롤러의 예외를 여기서 처리</span>
 <span class="k">public</span> <span class="k">class</span> <span class="t">GlobalExceptionHandler</span> {
 
     <span class="a">@ExceptionHandler</span>(<span class="t">IllegalArgumentException</span>.<span class="k">class</span>)
