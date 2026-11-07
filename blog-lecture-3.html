@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 웹 애플리케이션 3강 — 로그인 · JWT · 테스트 · 배포</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--ink:#1f2933;--muted:#52606d;--line:#e4e7eb;--accent:#6db33f;--accent2:#2c3e50;--code-bg:#282c34;--goal:#eafaf1;--goal-line:#27ae60;--ex:#eef4ff;--ex-line:#5b8def;--lab:#fff5e9;--lab-line:#e76f00;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.75;}
+  header.hero{background:linear-gradient(135deg,#6db33f,#2c3e50);color:#fff;padding:52px 24px;text-align:center;}
+  header.hero .eyebrow{letter-spacing:3px;font-size:.78rem;opacity:.9;text-transform:uppercase}
+  header.hero h1{margin:12px 0 8px;font-size:1.9rem}header.hero p{margin:0;opacity:.92}
+  header.hero .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  header.hero .tags span{background:rgba(255,255,255,.16);border-radius:999px;padding:5px 13px;font-size:.82rem}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:34px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  nav.toc h2{margin:0 0 12px;font-size:1.05rem;color:var(--accent2)}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:34px}
+  nav.toc a{color:var(--ink);text-decoration:none}nav.toc a:hover{color:var(--accent);text-decoration:underline}
+  section.module{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin-bottom:26px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  section.module > h2{margin:0 0 6px;font-size:1.4rem;color:var(--accent2);display:flex;align-items:center;gap:12px;}
+  section.module > h2 .num{background:var(--accent);color:#fff;font-size:.95rem;font-weight:800;padding:4px 12px;border-radius:10px;min-width:38px;text-align:center;}
+  h3.blk{font-size:1.02rem;margin:22px 0 8px;font-weight:800}
+  .goal{background:var(--goal);border-left:5px solid var(--goal-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:14px 0}
+  .goal .lbl{font-weight:800;color:#1e874b}.goal ul{margin:8px 0 0}
+  .concept{margin:16px 0}
+  .concept h3.blk{color:var(--ink);border-left:4px solid var(--accent);padding-left:10px}
+  .ex{background:var(--ex);border-left:5px solid var(--ex-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .ex .lbl{font-weight:800;color:#2f5fc7}
+  .lab{background:var(--lab);border-left:5px solid var(--lab-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .lab .lbl{font-weight:800;color:#c85f00}.lab h4{margin:6px 0 6px;font-size:.98rem}
+  .note{background:#fffbea;border-left:5px solid #f0c000;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .note .lbl{font-weight:800;color:#a67c00}
+  ul{margin:8px 0}li{margin:5px 0}.muted{color:var(--muted)}
+  code{background:#eceef1;padding:2px 6px;border-radius:5px;font-size:.92em;font-family:Consolas,"D2Coding",monospace}
+  pre{background:var(--code-bg);color:#abb2bf;border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:Consolas,"D2Coding",monospace;font-size:.9rem;line-height:1.6;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+  pre .k{color:#c678dd}pre .t{color:#e5c07b}pre .s{color:#98c379}pre .c{color:#7f848e;font-style:italic}pre .f{color:#61afef}pre .n{color:#d19a66}pre .g{color:#56b6c2}pre .a{color:#e06c75}
+  .out{background:#1b1e24;color:#9fd18a;border-radius:8px;padding:10px 14px;font-family:Consolas,"D2Coding",monospace;font-size:.86rem;margin:6px 0 0;white-space:pre-wrap}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.93rem}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#f0f4f8;color:var(--accent2)}td.c,th.c{text-align:center}
+  .method{font-weight:800;border-radius:6px;padding:2px 8px;font-size:.82rem;color:#fff}
+  .m-get{background:#2f8f4e}.m-post{background:#d98a00}.m-put{background:#2f5fc7}.m-del{background:#c0392b}
+  figure{margin:14px 0;text-align:center}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 20px}
+  .pill{display:inline-block;background:#eceef1;border-radius:6px;padding:2px 9px;margin:2px;font-size:.85rem}
+
+  details{margin:8px 0}summary{cursor:pointer;font-weight:700;color:#c85f00}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .flow span.box{background:#f0f4f8;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.88rem}
+  .flow span.arr{color:#e76f00;font-weight:800}
+  .warn{background:#fdecea;border-left:5px solid #c0392b;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .warn .lbl{font-weight:800;color:#a93226}
+  @media (max-width:640px){table{display:block;overflow-x:auto}code{word-break:break-all}nav.toc ol{columns:1}section.module{padding:20px 18px}header.hero h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">Java 웹 &amp; Spring Boot · 종합 프로젝트 · 학습 교안 3강 (단원 1~5)</div>
+  <h1>3강. 로그인 · JWT · 테스트 · 배포</h1>
+  <p>Spring Security 회원가입 · 로그인 → JWT 토큰 → 실행 &amp; 테스트 → AWS Elastic Beanstalk + RDS 배포 → 확장 과제</p>
+  <div class="tags"><span>🔐 Spring Security</span><span>🔑 JWT</span><span>🧪 테스트</span><span>☁️ AWS</span><span>🐬 RDS(MySQL)</span></div>
+</header>
+<div class="wrap">
+  <p style="margin:0 0 16px"><a href="blog-lecture-2.html">← 2강. 화면 · JS · 이미지 업로드 · AI</a></p>
+  <nav class="toc"><h2>📚 학습 목차</h2><ol start="1"><li><a href="#m1">Spring Security — 회원가입 · 로그인</a></li><li><a href="#m2">JWT 토큰 (TokenProvider)</a></li><li><a href="#m3">실행 &amp; 테스트</a></li><li><a href="#m4">운영 배포 (AWS Elastic Beanstalk + RDS)</a></li><li><a href="#m5">실습문제 (확장 과제)</a></li></ol></nav>
+  <section class="module" id="m1"><h2><span class="num">1</span> Spring Security — 회원가입 · 로그인</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li><code>UserDetails</code> / <code>UserDetailsService</code>를 구현해 DB 회원으로 로그인할 수 있다.</li><li><code>SecurityFilterChain</code>으로 공개 URL과 인증 필요 URL을 나눌 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — Spring Security 의존성 추가 (1강에서 빼 둔 Spring Security)</div><pre><span class="k">dependencies</span> {
+    <span class="c">// 보안</span>
+    <span class="k">implementation</span> <span class="s">'org.springframework.boot:spring-boot-starter-security'</span>
+    <span class="k">implementation</span> <span class="s">'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'</span>
+}</pre></div><div class="concept"><h3 class="blk">📖 로그인 처리 흐름</h3><div class="flow"><span class="box">POST /login (username=이메일, password)</span><span class="arr">→</span><span class="box">UserDetailService.loadUserByUsername()</span><span class="arr">→</span><span class="box">BCrypt 비밀번호 비교</span><span class="arr">→</span><span class="box">세션 생성</span><span class="arr">→</span><span class="box">/articles 이동</span></div>
+<p>로그인 폼은 Spring Security가 직접 처리하므로 <code>POST /login</code> 컨트롤러는 만들지 않는다. 입력 이름은 반드시 <code>username</code>, <code>password</code>여야 한다.</p></div><div class="ex"><div class="lbl">💡 domain/User.java — UserDetails 구현</div><pre><span class="a">@Table</span>(name = <span class="s">"users"</span>)   <span class="c">// user는 예약어인 DB가 많아 users 사용</span>
+<span class="a">@NoArgsConstructor</span>(access = <span class="t">AccessLevel</span>.<span class="t">PROTECTED</span>)
+<span class="a">@Getter</span>
+<span class="a">@Entity</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">User</span> <span class="k">implements</span> <span class="t">UserDetails</span> {
+    <span class="a">@Id</span>
+    <span class="a">@GeneratedValue</span>(strategy = <span class="t">GenerationType</span>.<span class="t">IDENTITY</span>)
+    <span class="a">@Column</span>(name = <span class="s">"id"</span>, updatable = <span class="k">false</span>)
+    <span class="k">private</span> <span class="t">Long</span> id;
+
+    <span class="a">@Column</span>(name = <span class="s">"email"</span>, nullable = <span class="k">false</span>, unique = <span class="k">true</span>)
+    <span class="k">private</span> <span class="t">String</span> email;
+
+    <span class="a">@Column</span>(name = <span class="s">"password"</span>)
+    <span class="k">private</span> <span class="t">String</span> password;
+
+    <span class="a">@Builder</span>
+    <span class="k">public</span> <span class="f">User</span>(<span class="t">String</span> email, <span class="t">String</span> password) {
+        <span class="k">this</span>.email = email;
+        <span class="k">this</span>.password = password;
+    }
+
+    <span class="a">@Override</span>
+    <span class="k">public</span> <span class="t">Collection</span>&lt;? <span class="k">extends</span> <span class="t">GrantedAuthority</span>&gt; <span class="f">getAuthorities</span>() {
+        <span class="k">return</span> <span class="t">List</span>.<span class="f">of</span>(<span class="k">new</span> <span class="f">SimpleGrantedAuthority</span>(<span class="s">"ROLE_USER"</span>));
+    }
+
+    <span class="a">@Override</span> <span class="k">public</span> <span class="t">String</span> <span class="f">getUsername</span>() { <span class="k">return</span> email; }   <span class="c">// 이메일을 로그인 ID로</span>
+    <span class="a">@Override</span> <span class="k">public</span> <span class="t">String</span> <span class="f">getPassword</span>() { <span class="k">return</span> password; }
+    <span class="a">@Override</span> <span class="k">public</span> <span class="k">boolean</span> <span class="f">isAccountNonExpired</span>() { <span class="k">return</span> <span class="k">true</span>; }
+    <span class="a">@Override</span> <span class="k">public</span> <span class="k">boolean</span> <span class="f">isAccountNonLocked</span>() { <span class="k">return</span> <span class="k">true</span>; }
+    <span class="a">@Override</span> <span class="k">public</span> <span class="k">boolean</span> <span class="f">isCredentialsNonExpired</span>() { <span class="k">return</span> <span class="k">true</span>; }
+    <span class="a">@Override</span> <span class="k">public</span> <span class="k">boolean</span> <span class="f">isEnabled</span>() { <span class="k">return</span> <span class="k">true</span>; }
+}</pre></div><div class="ex"><div class="lbl">💡 service/UserDetailService.java · UserService.java</div><pre><span class="c">// 로그인 시 Spring Security가 호출 — 이메일로 회원 조회</span>
+<span class="a">@RequiredArgsConstructor</span>
+<span class="a">@Service</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">UserDetailService</span> <span class="k">implements</span> <span class="t">UserDetailsService</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserRepository</span> userRepository;
+
+    <span class="a">@Override</span>
+    <span class="k">public</span> <span class="t">UserDetails</span> <span class="f">loadUserByUsername</span>(<span class="t">String</span> email) {
+        <span class="k">return</span> userRepository.<span class="f">findByEmail</span>(email)
+                .<span class="f">orElseThrow</span>(() -&gt; <span class="k">new</span> <span class="f">IllegalArgumentException</span>(email));
+    }
+}
+
+<span class="c">// 회원가입 — 비밀번호는 반드시 암호화해서 저장</span>
+<span class="a">@RequiredArgsConstructor</span>
+<span class="a">@Service</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">UserService</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserRepository</span> userRepository;
+    <span class="k">private</span> <span class="k">final</span> <span class="t">PasswordEncoder</span> passwordEncoder;
+
+    <span class="k">public</span> <span class="t">Long</span> <span class="f">save</span>(<span class="t">AddUserRequest</span> dto) {
+        <span class="k">return</span> userRepository.<span class="f">save</span>(<span class="t">User</span>.<span class="f">builder</span>()
+                .<span class="f">email</span>(dto.<span class="f">getEmail</span>())
+                .<span class="f">password</span>(passwordEncoder.<span class="f">encode</span>(dto.<span class="f">getPassword</span>()))
+                .<span class="f">build</span>()).<span class="f">getId</span>();
+    }
+}</pre></div><div class="ex"><div class="lbl">💡 config/WebSecurityConfig.java</div><pre><span class="a">@Configuration</span>
+<span class="a">@EnableWebSecurity</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">WebSecurityConfig</span> {
+
+    <span class="c">// 시큐리티 검사 자체를 건너뛸 경로</span>
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">WebSecurityCustomizer</span> <span class="f">configure</span>() {
+        <span class="k">return</span> web -&gt; web.<span class="f">ignoring</span>()
+                .<span class="f">requestMatchers</span>(<span class="s">"/static/**"</span>);
+    }
+
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">SecurityFilterChain</span> <span class="f">filterChain</span>(<span class="t">HttpSecurity</span> http) {
+        <span class="k">return</span> http
+                .<span class="f">authorizeHttpRequests</span>(auth -&gt; auth
+                        .<span class="f">requestMatchers</span>(<span class="s">"/login"</span>, <span class="s">"/signup"</span>, <span class="s">"/user"</span>).<span class="f">permitAll</span>()
+                        .<span class="f">anyRequest</span>().<span class="f">authenticated</span>())        <span class="c">// 나머지는 로그인 필요</span>
+                .<span class="f">formLogin</span>(form -&gt; form
+                        .<span class="f">loginPage</span>(<span class="s">"/login"</span>)
+                        .<span class="f">defaultSuccessUrl</span>(<span class="s">"/articles"</span>, <span class="k">true</span>)) <span class="c">// true: 항상 /articles로</span>
+                .<span class="f">logout</span>(logout -&gt; logout
+                        .<span class="f">logoutSuccessUrl</span>(<span class="s">"/login"</span>)
+                        .<span class="f">invalidateHttpSession</span>(<span class="k">true</span>))
+                .<span class="f">csrf</span>(<span class="t">AbstractHttpConfigurer</span>::disable)       <span class="c">// 학습용으로 CSRF 비활성화</span>
+                .<span class="f">build</span>();
+    }
+
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">PasswordEncoder</span> <span class="f">passwordEncoder</span>() {
+        <span class="k">return</span> <span class="k">new</span> <span class="f">BCryptPasswordEncoder</span>();
+    }
+}</pre></div><div class="ex"><div class="lbl">💡 controller/UserApiController.java — 회원가입 · 로그아웃</div><pre><span class="a">@RequiredArgsConstructor</span>
+<span class="a">@Controller</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">UserApiController</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserService</span> userService;
+
+    <span class="a">@PostMapping</span>(<span class="s">"/user"</span>)   <span class="c">// signup.html 폼 (name="email", name="password")</span>
+    <span class="k">public</span> <span class="t">String</span> <span class="f">signup</span>(<span class="t">AddUserRequest</span> request) {
+        userService.<span class="f">save</span>(request);
+        <span class="k">return</span> <span class="s">"redirect:/login"</span>;
+    }
+
+    <span class="a">@GetMapping</span>(<span class="s">"/logout"</span>)
+    <span class="k">public</span> <span class="t">String</span> <span class="f">logout</span>(<span class="t">HttpServletRequest</span> request, <span class="t">HttpServletResponse</span> response) {
+        <span class="k">new</span> <span class="f">SecurityContextLogoutHandler</span>().<span class="f">logout</span>(request, response,
+                <span class="t">SecurityContextHolder</span>.<span class="f">getContext</span>().<span class="f">getAuthentication</span>());
+        <span class="k">return</span> <span class="s">"redirect:/login"</span>;
+    }
+}</pre></div></section><section class="module" id="m2"><h2><span class="num">2</span> JWT 토큰 (TokenProvider)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>JWT의 구조(헤더·페이로드·서명)와 발급·검증 과정을 이해한다.</li></ul></div><div class="ex"><div class="lbl">💡 build.gradle — JWT 의존성 추가</div><pre><span class="k">dependencies</span> {
+    <span class="k">implementation</span> <span class="s">'io.jsonwebtoken:jjwt:0.9.1'</span>
+    <span class="k">implementation</span> <span class="s">'javax.xml.bind:jaxb-api:2.3.1'</span>   <span class="c">// jjwt 0.9.x는 Java 11+에서 필요</span>
+}</pre></div><div class="ex"><div class="lbl">💡 application.yaml — 최상위에 JWT 설정 추가</div><pre><span class="c"># JWT 설정은 spring: 아래가 아니라 최상위에 둔다 (@ConfigurationProperties("jwt"))</span>
+<span class="g">jwt</span>:
+  <span class="g">issuer</span>: sudo-blog
+  <span class="g">secret_key</span>: <span class="n">${JWT_SECRET_KEY:study-springboot}</span></pre><div class="warn"><span class="lbl">⚠️ 주의</span> — YAML은 <b>들여쓰기가 곧 구조</b>다. <code>jwt:</code>를 <code>spring.ai</code> 아래에 두면 키가 <code>spring.ai.jwt.*</code>가 되어 <code>JwtProperties</code>에 값이 들어가지 않는다. 키 이름도 필드명과 같아야 한다(<code>issuer</code>).</div></div><div class="concept"><h3 class="blk">📖 개념 및 설명</h3><ul>
+<li><b>세션 방식</b>: 서버가 로그인 상태를 기억한다. <b>JWT 방식</b>: 서버가 서명한 <b>토큰</b>을 클라이언트가 들고 다니며 매 요청 <code>Authorization: Bearer 토큰</code>으로 보낸다.</li>
+<li>토큰 = <code>헤더.페이로드.서명</code>. 페이로드에 발급자(iss)·발급일(iat)·만료일(exp)·사용자(sub)·id를 담고, 비밀키로 서명해 위조를 막는다.</li>
+<li>현재 프로젝트는 <b>토큰 발급·검증 클래스까지</b> 만든 상태다. 요청마다 토큰을 검사하는 필터는 실습 3에서 완성한다.</li>
+</ul></div><div class="ex"><div class="lbl">💡 config/jwt/JwtProperties.java · TokenProvider.java</div><pre><span class="a">@Setter</span>
+<span class="a">@Getter</span>
+<span class="a">@Component</span>
+<span class="a">@ConfigurationProperties</span>(<span class="s">"jwt"</span>)   <span class="c">// application.yaml의 jwt.issuer, jwt.secret_key</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">JwtProperties</span> {
+    <span class="k">private</span> <span class="t">String</span> issuer;
+    <span class="k">private</span> <span class="t">String</span> secretKey;
+}
+
+<span class="a">@RequiredArgsConstructor</span>
+<span class="a">@Service</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">TokenProvider</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">JwtProperties</span> jwtProperties;
+
+    <span class="c">// 토큰 발급</span>
+    <span class="k">public</span> <span class="t">String</span> <span class="f">generateToken</span>(<span class="t">User</span> user, <span class="t">Duration</span> expiredAt) {
+        <span class="t">Date</span> now = <span class="k">new</span> <span class="f">Date</span>();
+        <span class="k">return</span> <span class="t">Jwts</span>.<span class="f">builder</span>()
+                .<span class="f">setHeaderParam</span>(<span class="t">Header</span>.<span class="t">TYPE</span>, <span class="t">Header</span>.<span class="t">JWT_TYPE</span>)
+                .<span class="f">setIssuer</span>(jwtProperties.<span class="f">getIssuer</span>())
+                .<span class="f">setIssuedAt</span>(now)
+                .<span class="f">setExpiration</span>(<span class="k">new</span> <span class="f">Date</span>(now.<span class="f">getTime</span>() + expiredAt.<span class="f">toMillis</span>()))
+                .<span class="f">setSubject</span>(user.<span class="f">getEmail</span>())
+                .<span class="f">claim</span>(<span class="s">"id"</span>, user.<span class="f">getId</span>())
+                .<span class="f">signWith</span>(<span class="t">SignatureAlgorithm</span>.<span class="t">HS256</span>, jwtProperties.<span class="f">getSecretKey</span>())
+                .<span class="f">compact</span>();
+    }
+
+    <span class="c">// 유효성 검증 (서명·만료)</span>
+    <span class="k">public</span> <span class="k">boolean</span> <span class="f">validToken</span>(<span class="t">String</span> token) {
+        <span class="k">try</span> {
+            <span class="t">Jwts</span>.<span class="f">parser</span>().<span class="f">setSigningKey</span>(jwtProperties.<span class="f">getSecretKey</span>()).<span class="f">parseClaimsJws</span>(token);
+            <span class="k">return</span> <span class="k">true</span>;
+        } <span class="k">catch</span> (<span class="t">Exception</span> e) {
+            <span class="k">return</span> <span class="k">false</span>;
+        }
+    }
+
+    <span class="c">// 토큰 → 인증 정보</span>
+    <span class="k">public</span> <span class="t">Authentication</span> <span class="f">getAuthentication</span>(<span class="t">String</span> token) {
+        <span class="t">Claims</span> claims = <span class="f">getClaims</span>(token);
+        <span class="t">Set</span>&lt;<span class="t">SimpleGrantedAuthority</span>&gt; authorities =
+                <span class="t">Collections</span>.<span class="f">singleton</span>(<span class="k">new</span> <span class="f">SimpleGrantedAuthority</span>(<span class="s">"ROLE_USER"</span>));
+        <span class="k">return</span> <span class="k">new</span> <span class="f">UsernamePasswordAuthenticationToken</span>(
+                <span class="k">new</span> org.springframework.security.core.userdetails.<span class="f">User</span>(
+                        claims.<span class="f">getSubject</span>(), <span class="s">""</span>, authorities), token, authorities);
+    }
+
+    <span class="k">public</span> <span class="t">Long</span> <span class="f">getUserId</span>(<span class="t">String</span> token) {
+        <span class="k">return</span> <span class="f">getClaims</span>(token).<span class="f">get</span>(<span class="s">"id"</span>, <span class="t">Long</span>.<span class="k">class</span>);
+    }
+
+    <span class="k">private</span> <span class="t">Claims</span> <span class="f">getClaims</span>(<span class="t">String</span> token) {
+        <span class="k">return</span> <span class="t">Jwts</span>.<span class="f">parser</span>().<span class="f">setSigningKey</span>(jwtProperties.<span class="f">getSecretKey</span>())
+                .<span class="f">parseClaimsJws</span>(token).<span class="f">getBody</span>();
+    }
+}</pre></div></section><section class="module" id="m3"><h2><span class="num">3</span> 실행 &amp; 테스트</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>브라우저와 curl로 화면·API를 테스트하고 JSON 응답을 확인할 수 있다.</li></ul></div><div class="concept"><h3 class="blk">▶ 실행 순서</h3><ol>
+<li><code>.\gradlew bootRun</code> (또는 IntelliJ에서 <code>BlogwebApplication</code> 실행)</li>
+<li><code>http://localhost:8080/signup</code> → 회원가입</li>
+<li><code>http://localhost:8080/login</code> → 로그인 → <code>/articles</code> 목록 (샘플 글 3개)</li>
+<li>글 등록(이미지·AI 도우미 포함) → 상세 → 수정 → 삭제</li>
+<li>DB 확인: MySQL Workbench에서 <code>SELECT * FROM springdb.article;</code>, <code>SELECT * FROM springdb.users;</code></li>
+</ol></div><div class="note"><span class="lbl">💡 API 테스트 전에</span> — 모든 API가 <b>로그인 필요</b>다. Postman/curl로 호출하려면 먼저 <code>/login</code>에 폼 로그인해 받은 <b>세션 쿠키(JSESSIONID)</b>를 함께 보내야 한다. 로그인 없이 호출하면 로그인 페이지(302)로 리다이렉트된다.</div><div class="ex"><div class="lbl">💡 ① 로그인해서 쿠키 저장 — <span class="method m-post">POST</span> /login</div><pre>curl -c cookie.txt -d <span class="s">"username=test@test.com&amp;password=1234"</span> http://localhost:8080/login</pre></div><div class="ex"><div class="lbl">💡 ② 글 등록 — <span class="method m-post">POST</span> /api/articles</div><pre>curl -b cookie.txt -X POST http://localhost:8080/api/articles \
+     -H <span class="s">"Content-Type: application/json"</span> \
+     -d <span class="s">'{"title":"첫 글","content":"Spring Boot 블로그","imageUrl":null}'</span></pre><div class="out">HTTP 201 Created
+{
+  &quot;id&quot;: 4,
+  &quot;title&quot;: &quot;첫 글&quot;,
+  &quot;content&quot;: &quot;Spring Boot 블로그&quot;,
+  &quot;imageUrl&quot;: null,
+  &quot;createdAt&quot;: &quot;2026-10-23T19:50:12.345&quot;,
+  &quot;updatedAt&quot;: &quot;2026-10-23T19:50:12.345&quot;
+}</div></div><div class="ex"><div class="lbl">💡 ③ 글 목록 — <span class="method m-get">GET</span> /api/articles</div><pre>curl -b cookie.txt http://localhost:8080/api/articles</pre><div class="out">[
+  { &quot;title&quot;: &quot;제목 1 입니다.&quot;, &quot;content&quot;: &quot;내용 1 입니다.&quot;, &quot;imageUrl&quot;: null },
+  { &quot;title&quot;: &quot;제목 2 입니다.&quot;, &quot;content&quot;: &quot;내용 2 입니다.&quot;, &quot;imageUrl&quot;: null },
+  ...
+]</div></div><div class="ex"><div class="lbl">💡 ④ 이미지 업로드 — <span class="method m-post">POST</span> /api/upload</div><pre>curl -b cookie.txt -F <span class="s">"file=@photo.jpg"</span> http://localhost:8080/api/upload</pre><div class="out">{ &quot;imageUrl&quot;: &quot;/uploads/6550e467-f96a-4eb3-8568-5d6c1d57a95a.jpg&quot; }</div></div><div class="ex"><div class="lbl">💡 ⑤ AI 제안 — <span class="method m-post">POST</span> /api/ai-suggestions</div><pre>curl -b cookie.txt -X POST http://localhost:8080/api/ai-suggestions \
+     -H <span class="s">"Content-Type: application/json"</span> \
+     -d <span class="s">'{"title":"Spring Boot 입문","content":"오늘은 JPA를 배웠다.","question":"다음에 무엇을 쓰면 좋을까?"}'</span></pre><div class="out">{
+  &quot;suggestions&quot;: [
+    &quot;엔티티와 테이블이 어떻게 매핑되는지 예제로 보여 주세요.&quot;,
+    &quot;더티 체킹으로 수정이 자동 반영되는 과정을 설명해 보세요.&quot;,
+    &quot;직접 겪은 오류와 해결 과정을 정리해 보세요.&quot;
+  ]
+}</div></div><div class="ex"><div class="lbl">💡 ⑥ 없는 글 조회 (에러) — <span class="method m-get">GET</span> /api/articles/999</div><pre>curl -b cookie.txt http://localhost:8080/api/articles/999</pre><div class="out" style="color:#ff9b9b">HTTP 500 Internal Server Error
+(IllegalArgumentException: not found: 999)</div><p class="muted" style="margin-top:8px">예외 처리기가 없어서 500이 난다. 실습 1에서 <code>@RestControllerAdvice</code>로 <b>404 + JSON 메시지</b>로 바꿔 보자.</p></div><div class="concept"><h3 class="blk">📁 완성 프로젝트 폴더 구조</h3><pre>blogweb/
+├─ build.gradle · settings.gradle · gradlew(.bat)
+├─ DEPLOY.md                         # AWS 배포 가이드
+├─ uploads/                          # 업로드 이미지 저장
+└─ src/main/
+   ├─ java/com/sudo/blogweb/
+   │  ├─ BlogwebApplication.java              # main + @EnableJpaAuditing
+   │  ├─ config/                           # WebMvcConfig, WebSecurityConfig, jwt/
+   │  ├─ controller/                       # BlogApi, BlogView, Upload, UserApi, UserView
+   │  ├─ domain/                           # Article, User (@Entity)
+   │  ├─ dto/                              # 요청/응답 DTO
+   │  ├─ repository/                       # BlogRepository, UserRepository
+   │  └─ service/                          # BlogService, UserService, WritingAssistantService ...
+   └─ resources/
+      ├─ application.yaml · application-prod.yaml · data.sql
+      ├─ prompts/writing-assistant.st
+      ├─ static/js/article.js
+      └─ templates/                        # articleList, article, newArticle, login, signup</pre></div></section><section class="module" id="m4"><h2><span class="num">4</span> 운영 배포 (AWS Elastic Beanstalk + RDS)</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>프로파일(prod)로 로컬 MySQL과 운영 RDS(MySQL) 접속 정보를 분리할 수 있다.</li><li>JAR를 빌드해 Elastic Beanstalk에 배포하는 순서를 설명할 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 application-prod.yaml — SPRING_PROFILES_ACTIVE=prod 일 때 적용</div><pre><span class="g">spring</span>:
+  <span class="g">datasource</span>:
+    <span class="g">url</span>: jdbc:mysql://<span class="n">${RDS_HOSTNAME}</span>:<span class="n">${RDS_PORT}</span>/<span class="n">${RDS_DB_NAME}</span>?useSSL=<span class="k">false</span>&amp;serverTimezone=UTC
+    <span class="g">username</span>: <span class="n">${RDS_USERNAME}</span>
+    <span class="g">password</span>: <span class="n">${RDS_PASSWORD}</span>
+    <span class="g">driver-class-name</span>: com.mysql.cj.jdbc.Driver
+  <span class="g">jpa</span>:
+    <span class="g">hibernate</span>:
+      <span class="g">ddl-auto</span>: <span class="k">update</span>        <span class="c"># 운영에서 create-drop 금지 (데이터 삭제됨)</span>
+    <span class="g">show-sql</span>: <span class="k">false</span>
+  <span class="g">sql</span>:
+    <span class="g">init</span>:
+      <span class="g">mode</span>: <span class="k">never</span>             <span class="c"># data.sql은 로컬 전용</span></pre></div><div class="concept"><h3 class="blk">📖 배포 순서 요약</h3><table>
+<tr><th>#</th><th>작업</th><th>포인트</th></tr>
+<tr><td>1</td><td>RDS(MySQL) 생성</td><td>프리 티어, <b>초기 DB 이름 <code>springdb</code></b> 입력</td></tr>
+<tr><td>2</td><td>보안 그룹</td><td>RDS 인바운드 3306 ← EB 보안 그룹 허용</td></tr>
+<tr><td>3</td><td>EB 환경변수</td><td><code>SPRING_PROFILES_ACTIVE=prod</code>, <code>RDS_*</code>, <code>SERVER_PORT=5000</code>, <code>GEMINI_API_KEY</code></td></tr>
+<tr><td>4</td><td>빌드</td><td><code>.\gradlew clean bootJar</code> → <code>build/libs/blogweb-0.0.1-SNAPSHOT.jar</code></td></tr>
+<tr><td>5</td><td>업로드 · 배포</td><td>EB 콘솔 → 업로드 및 배포 → 상태 Ok 확인</td></tr>
+</table>
+<table>
+<tr><th>증상</th><th>원인 → 해결</th></tr>
+<tr><td>502 Bad Gateway</td><td>앱이 8080에서 뜸 → <code>SERVER_PORT=5000</code></td></tr>
+<tr><td>연결 타임아웃</td><td>RDS 보안 그룹 3306 미허용</td></tr>
+<tr><td>고쳤는데 그대로</td><td>예전 JAR 업로드 → <code>clean</code> 후 JAR 수정 시각 확인</td></tr>
+</table><div class="note"><span class="lbl">💡 자세한 내용</span> — 프로젝트의 <code>DEPLOY.md</code>에 RDS 생성, 보안 그룹, GitHub Actions 자동 배포까지 단계별로 정리되어 있다. 업로드 이미지(<code>uploads/</code>)는 EB 인스턴스가 교체되면 사라지므로 운영에서는 S3를 검토한다.</div></div></section><section class="module" id="m5"><h2><span class="num">5</span> 실습문제 (확장 과제)</h2><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 1. 전역 예외 처리 (@RestControllerAdvice)</h4><p>없는 글을 조회·수정할 때 500 대신 <b>404 Not Found</b>와 <code>{"error":"not found: 999"}</code>를 돌려주도록 <code>GlobalExceptionHandler</code>를 만드세요.</p><details><summary>힌트 보기</summary><pre><span class="a">@RestControllerAdvice</span>   <span class="c">// 모든 컨트롤러의 예외를 여기서 처리</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">GlobalExceptionHandler</span> {
+
+    <span class="a">@ExceptionHandler</span>(<span class="t">IllegalArgumentException</span>.<span class="k">class</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;&gt; <span class="f">handleNotFound</span>(<span class="t">IllegalArgumentException</span> e) {
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">status</span>(<span class="t">HttpStatus</span>.<span class="t">NOT_FOUND</span>)
+                .<span class="f">body</span>(<span class="t">Map</span>.<span class="f">of</span>(<span class="s">"error"</span>, e.<span class="f">getMessage</span>()));
+    }
+}</pre></details></div><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 2. 작성자(author) 연동 & 본인만 수정·삭제</h4><p><code>Article</code>에 <code>author</code> 컬럼을 추가하고, 글 등록 시 로그인한 사용자의 이메일을 저장하세요. 수정·삭제는 <b>작성자 본인만</b> 가능하게 하고, 아니면 403을 반환합니다. 상세 화면에도 작성자를 표시해 보세요.</p><details><summary>힌트 보기</summary><pre><span class="c">// 컨트롤러 — 로그인 사용자 정보 받기</span>
+<span class="a">@PostMapping</span>(<span class="s">"/api/articles"</span>)
+<span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Article</span>&gt; <span class="f">addArticle</span>(<span class="a">@RequestBody</span> <span class="t">AddArticleRequest</span> request,
+                                          <span class="t">Principal</span> principal) {
+    <span class="t">Article</span> saved = blogService.<span class="f">save</span>(request, principal.<span class="f">getName</span>());
+    <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">status</span>(<span class="t">HttpStatus</span>.<span class="t">CREATED</span>).<span class="f">body</span>(saved);
+}
+
+<span class="c">// 서비스 — 본인 확인</span>
+<span class="k">private</span> <span class="k">void</span> <span class="f">authorizeArticleAuthor</span>(<span class="t">Article</span> article) {
+    <span class="t">String</span> userName = <span class="t">SecurityContextHolder</span>.<span class="f">getContext</span>().<span class="f">getAuthentication</span>().<span class="f">getName</span>();
+    <span class="k">if</span> (!article.<span class="f">getAuthor</span>().<span class="f">equals</span>(userName)) {
+        <span class="k">throw</span> <span class="k">new</span> <span class="f">IllegalStateException</span>(<span class="s">"작성자만 수정/삭제할 수 있습니다."</span>);
+    }
+}</pre></details></div><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 3. JWT 인증 필터 완성 ★</h4><p><code>OncePerRequestFilter</code>를 상속한 <code>TokenAuthenticationFilter</code>를 만들어, 요청 헤더 <code>Authorization: Bearer 토큰</code>을 검사하고 유효하면 <code>SecurityContext</code>에 인증 정보를 넣으세요. 로그인 성공 시 토큰을 발급하는 <code>POST /api/token</code>도 추가합니다.</p><details><summary>힌트 보기</summary><pre><span class="a">@RequiredArgsConstructor</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">TokenAuthenticationFilter</span> <span class="k">extends</span> <span class="t">OncePerRequestFilter</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">TokenProvider</span> tokenProvider;
+
+    <span class="a">@Override</span>
+    <span class="k">protected</span> <span class="k">void</span> <span class="f">doFilterInternal</span>(<span class="t">HttpServletRequest</span> request, <span class="t">HttpServletResponse</span> response,
+                                    <span class="t">FilterChain</span> filterChain) <span class="k">throws</span> <span class="t">ServletException</span>, <span class="t">IOException</span> {
+        <span class="t">String</span> header = request.<span class="f">getHeader</span>(<span class="s">"Authorization"</span>);
+        <span class="k">if</span> (header != <span class="k">null</span> &amp;&amp; header.<span class="f">startsWith</span>(<span class="s">"Bearer "</span>)) {
+            <span class="t">String</span> token = header.<span class="f">substring</span>(<span class="n">7</span>);
+            <span class="k">if</span> (tokenProvider.<span class="f">validToken</span>(token)) {
+                <span class="t">SecurityContextHolder</span>.<span class="f">getContext</span>()
+                        .<span class="f">setAuthentication</span>(tokenProvider.<span class="f">getAuthentication</span>(token));
+            }
+        }
+        filterChain.<span class="f">doFilter</span>(request, response);
+    }
+}
+
+<span class="c">// WebSecurityConfig</span>
+<span class="c">// .addFilterBefore(new TokenAuthenticationFilter(tokenProvider),</span>
+<span class="c">//                  UsernamePasswordAuthenticationFilter.class)</span></pre></details></div><div class="lab"><div class="lbl">✏️ 실습문제</div><h4>실습 4. 목록 페이징 &amp; 최신순 정렬</h4><p>글이 많아지면 한 번에 다 보여줄 수 없다. <code>Pageable</code>로 한 페이지에 5개씩, 최신 글이 먼저 오도록 바꾸고 목록 화면 아래에 페이지 번호를 만드세요.</p><details><summary>힌트 보기</summary><pre><span class="c">// 서비스</span>
+<span class="k">public</span> <span class="t">Page</span>&lt;<span class="t">Article</span>&gt; <span class="f">findPage</span>(<span class="k">int</span> page) {
+    <span class="k">return</span> blogRepository.<span class="f">findAll</span>(<span class="t">PageRequest</span>.<span class="f">of</span>(page, <span class="n">5</span>, <span class="t">Sort</span>.<span class="f">by</span>(<span class="s">"id"</span>).<span class="f">descending</span>()));
+}
+
+<span class="c">// 뷰 컨트롤러 — /articles?page=0</span>
+<span class="a">@GetMapping</span>(<span class="s">"/articles"</span>)
+<span class="k">public</span> <span class="t">String</span> <span class="f">getArticles</span>(<span class="a">@RequestParam</span>(defaultValue = <span class="s">"0"</span>) <span class="k">int</span> page, <span class="t">Model</span> model) {
+    <span class="t">Page</span>&lt;<span class="t">Article</span>&gt; result = blogService.<span class="f">findPage</span>(page);
+    model.<span class="f">addAttribute</span>(<span class="s">"articles"</span>, result.<span class="f">map</span>(<span class="t">ArticleListViewResponse</span>::<span class="k">new</span>).<span class="f">getContent</span>());
+    model.<span class="f">addAttribute</span>(<span class="s">"totalPages"</span>, result.<span class="f">getTotalPages</span>());
+    <span class="k">return</span> <span class="s">"articleList"</span>;
+}</pre></details></div></section>
+  <footer>블로그 웹 애플리케이션 (Spring Boot) · 학습 교안 3강<br>계층형 아키텍처 · Spring Data JPA · Thymeleaf · Spring AI · Spring Security 종합 실습</footer>
+</div>
+<script>
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href').slice(1);
+      var el = id ? document.getElementById(id) : null;
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+</script>
+</body>
+</html>
