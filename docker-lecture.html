@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도커(Docker) 개념과 사용법 — 학습 교안</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--ink:#1f2933;--muted:#52606d;--line:#e4e7eb;--accent:#1d63ed;--accent2:#0b2a5b;--code-bg:#282c34;--goal:#eafaf1;--goal-line:#27ae60;--ex:#eef4ff;--ex-line:#5b8def;--lab:#fff5e9;--lab-line:#e76f00;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.75;}
+  header.hero{background:linear-gradient(135deg,#1d63ed,#0b2a5b);color:#fff;padding:52px 24px;text-align:center;}
+  header.hero .eyebrow{letter-spacing:3px;font-size:.78rem;opacity:.9;text-transform:uppercase}
+  header.hero h1{margin:12px 0 8px;font-size:1.9rem}header.hero p{margin:0;opacity:.92}
+  header.hero .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  header.hero .tags span{background:rgba(255,255,255,.16);border-radius:999px;padding:5px 13px;font-size:.82rem}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:34px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  nav.toc h2{margin:0 0 12px;font-size:1.05rem;color:var(--accent2)}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:34px}
+  nav.toc a{color:var(--ink);text-decoration:none}nav.toc a:hover{color:var(--accent);text-decoration:underline}
+  section.module{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin-bottom:26px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  section.module > h2{margin:0 0 6px;font-size:1.4rem;color:var(--accent2);display:flex;align-items:center;gap:12px;}
+  section.module > h2 .num{background:var(--accent);color:#fff;font-size:.95rem;font-weight:800;padding:4px 12px;border-radius:10px;min-width:38px;text-align:center;}
+  h3.blk{font-size:1.02rem;margin:22px 0 8px;font-weight:800}
+  h3.part{font-size:1.12rem;margin:30px 0 12px;padding:8px 12px;background:#eaf1ff;border-left:5px solid var(--accent);border-radius:4px;color:var(--accent2)}
+  .goal{background:var(--goal);border-left:5px solid var(--goal-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:14px 0}
+  .goal .lbl{font-weight:800;color:#1e874b}.goal ul{margin:8px 0 0}
+  .concept{margin:16px 0}
+  .concept h3.blk{color:var(--ink);border-left:4px solid var(--accent);padding-left:10px}
+  .ex{background:var(--ex);border-left:5px solid var(--ex-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .ex .lbl{font-weight:800;color:#2f5fc7}
+  .lab{background:var(--lab);border-left:5px solid var(--lab-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .lab .lbl{font-weight:800;color:#c85f00}.lab h4{margin:6px 0 6px;font-size:.98rem}
+  .note{background:#fffbea;border-left:5px solid #f0c000;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .note .lbl{font-weight:800;color:#a67c00}
+  .warn{background:#fff0f0;border-left:5px solid #e04848;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .warn .lbl{font-weight:800;color:#c0392b}
+  ul{margin:8px 0}li{margin:3px 0}
+  code{background:#eef1f5;padding:1px 6px;border-radius:5px;font-family:Consolas,"D2Coding",monospace;font-size:.9em}
+  .codebox{position:relative;margin:12px 0}
+  .codebox .fname{background:#1e2229;color:#9aa5b1;font-size:.78rem;padding:6px 14px;border-radius:10px 10px 0 0;font-family:Consolas,monospace}
+  .codebox .fname + pre{border-radius:0 0 10px 10px;margin-top:0}
+  pre{background:var(--code-bg);color:#e6e6e6;padding:16px 18px;border-radius:10px;overflow-x:auto;font-size:.86rem;line-height:1.6;margin:12px 0}
+  pre code{background:none;padding:0;color:inherit;font-size:inherit}
+  pre .c{color:#7f8c98;font-style:italic}pre .k{color:#c678dd;font-weight:700}pre .s{color:#98c379}pre .n{color:#e5c07b}
+  .copy{position:absolute;right:10px;top:8px;background:#3b4048;color:#ddd;border:0;border-radius:6px;font-size:.74rem;padding:3px 9px;cursor:pointer}
+  .copy:hover{background:var(--accent);color:#fff}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.92rem}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:#f0f4fa;color:var(--accent2)}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:14px 0}
+  .flow .box{background:#eaf1ff;border:1px solid #b9cdf7;border-radius:8px;padding:6px 12px;font-size:.88rem;font-weight:600}
+  .flow .arr{color:var(--muted);font-weight:800}
+  .stack{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0}
+  .stack .col h4{margin:0 0 8px;text-align:center;font-size:.95rem}
+  .layer{border-radius:6px;padding:7px;text-align:center;font-size:.84rem;margin:4px 0;font-weight:600}
+  .l-app{background:#dbe8ff}.l-lib{background:#e9f7e1}.l-os{background:#fde9d4}.l-eng{background:#d6e4ff;border:2px solid var(--accent)}.l-host{background:#e4e7eb}
+  .row3{display:flex;gap:4px}.row3 > div{flex:1}
+  .ms{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:16px 0}
+  .ms .stage{border:2px dashed #b9cdf7;border-radius:10px;padding:12px 14px;font-size:.86rem;background:#f8faff}
+  .ms .stage b{display:block;margin-bottom:6px;color:var(--accent2)}
+  .ms .big{font-size:1.6rem;color:var(--accent)}
+  @media(max-width:700px){nav.toc ol{columns:1}.stack,.ms{grid-template-columns:1fr}section.module{padding:20px}}
+  @media print{.copy{display:none}header.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}section.module{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">Docker Fundamentals</div>
+  <h1>🐳 도커(Docker) 개념과 사용법</h1>
+  <p>컨테이너의 개념부터 MySQL 실행, Spring Boot 블로그 Dockerfile 분석까지</p>
+  <div class="tags"><span>Docker Desktop</span><span>Image · Container</span><span>MySQL 8.4</span><span>Volume</span><span>Docker Compose</span><span>Dockerfile</span><span>Spring Boot 4 · Java 21</span></div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h2>📚 목차</h2>
+  <ol>
+    <li><a href="#m1">도커란 무엇인가</a></li>
+    <li><a href="#m2">핵심 용어 정리</a></li>
+    <li><a href="#m3">설치와 첫 실행</a></li>
+    <li><a href="#m4">기본 명령어</a></li>
+    <li><a href="#m5">실습: 도커로 MySQL 사용하기</a></li>
+    <li><a href="#m6">Spring Boot와 MySQL 컨테이너 연결</a></li>
+    <li><a href="#m7">Docker Compose</a></li>
+    <li><a href="#m8">블로그 배포용 Dockerfile 해설</a></li>
+    <li><a href="#m9">자주 만나는 오류</a></li>
+    <li><a href="#m10">실습문제</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 1 ============ -->
+<section class="module" id="m1">
+  <h2><span class="num">1</span> 도커란 무엇인가</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>도커가 해결하는 문제("내 PC에서는 되는데…")를 설명할 수 있다.</li>
+    <li>가상머신(VM)과 컨테이너의 차이를 구분할 수 있다.</li>
+  </ul></div>
+
+  <div class="concept"><h3 class="blk">📖 왜 도커가 필요할까?</h3>
+  <p>블로그 프로젝트를 친구 PC나 서버에서 실행하려면 Java 21, MySQL, 환경변수, 포트 설정 등을 똑같이 맞춰야 합니다. 하나라도 다르면 <b>"내 PC에서는 되는데 서버에서는 안 돼요"</b>가 생깁니다.</p>
+  <p><b>도커(Docker)</b>는 프로그램과 그 프로그램이 돌아가는 데 필요한 모든 것(런타임, 라이브러리, 설정)을 <b>하나의 상자(컨테이너)</b>로 묶어서, 어디서든 똑같이 실행되게 해 주는 도구입니다.</p>
+  <div class="ex"><div class="lbl">💡 비유: 화물 컨테이너</div>
+  배에 싣는 화물 컨테이너는 안에 무엇이 들었든 크기와 규격이 같아서 배·트럭·기차 어디에나 그대로 실을 수 있습니다. 도커 컨테이너도 마찬가지로, 안에 Spring Boot가 있든 MySQL이 있든 <b>도커만 설치되어 있으면</b> Windows·Mac·Linux 서버 어디서나 같은 방식으로 실행됩니다.</div>
+  </div>
+
+  <div class="concept"><h3 class="blk">📖 가상머신(VM) vs 컨테이너</h3>
+  <div class="stack">
+    <div class="col"><h4>가상머신 (VirtualBox, VMware)</h4>
+      <div class="row3"><div><div class="layer l-app">App A</div><div class="layer l-lib">라이브러리</div><div class="layer l-os">게스트 OS</div></div><div><div class="layer l-app">App B</div><div class="layer l-lib">라이브러리</div><div class="layer l-os">게스트 OS</div></div></div>
+      <div class="layer l-eng">하이퍼바이저</div><div class="layer l-host">호스트 OS · 하드웨어</div></div>
+    <div class="col"><h4>컨테이너 (Docker)</h4>
+      <div class="row3"><div><div class="layer l-app">App A</div><div class="layer l-lib">라이브러리</div></div><div><div class="layer l-app">App B</div><div class="layer l-lib">라이브러리</div></div><div><div class="layer l-app">MySQL</div><div class="layer l-lib">라이브러리</div></div></div>
+      <div class="layer l-eng">Docker Engine</div><div class="layer l-host">호스트 OS(커널 공유) · 하드웨어</div></div>
+  </div>
+  <table>
+    <tr><th>구분</th><th>가상머신</th><th>컨테이너</th></tr>
+    <tr><td>OS</td><td>VM마다 OS 전체를 따로 설치</td><td>호스트 OS의 커널을 함께 사용</td></tr>
+    <tr><td>크기</td><td>수 GB</td><td>수십~수백 MB</td></tr>
+    <tr><td>시작 속도</td><td>수십 초 ~ 분</td><td>수 초 이내</td></tr>
+    <tr><td>격리 수준</td><td>매우 강함</td><td>프로세스 단위 격리(충분히 강함)</td></tr>
+    <tr><td>용도</td><td>완전히 다른 OS가 필요할 때</td><td>앱 배포, 개발환경 통일, DB 실행</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="module" id="m2">
+  <h2><span class="num">2</span> 핵심 용어 정리</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>이미지·컨테이너·레지스트리·Dockerfile의 관계를 설명할 수 있다.</li>
+    <li>포트 매핑과 볼륨이 왜 필요한지 말할 수 있다.</li>
+  </ul></div>
+
+  <div class="flow"><span class="box">Dockerfile<br><small>(설계도)</small></span><span class="arr">— docker build →</span><span class="box">이미지<br><small>(완성된 틀)</small></span><span class="arr">— docker run →</span><span class="box">컨테이너<br><small>(실행 중인 상자)</small></span></div>
+  <div class="flow"><span class="box">Docker Hub<br><small>(레지스트리)</small></span><span class="arr">— docker pull →</span><span class="box">내 PC의 이미지</span><span class="arr">— docker push →</span><span class="box">Docker Hub</span></div>
+
+  <table>
+    <tr><th style="width:22%">용어</th><th>설명</th><th style="width:30%">Java로 비유하면</th></tr>
+    <tr><td><b>이미지 (Image)</b></td><td>컨테이너를 만들기 위한 읽기 전용 틀. OS 파일·런타임·앱이 층(layer)으로 쌓여 있음. 예: <code>mysql:8.4</code></td><td>클래스 (<code>class Blog</code>)</td></tr>
+    <tr><td><b>컨테이너 (Container)</b></td><td>이미지를 실행한 것. 하나의 이미지로 여러 컨테이너를 만들 수 있음</td><td>객체 (<code>new Blog()</code>)</td></tr>
+    <tr><td><b>레지스트리</b></td><td>이미지를 저장·공유하는 저장소. 대표적으로 <b>Docker Hub</b></td><td>Maven Central</td></tr>
+    <tr><td><b>태그 (Tag)</b></td><td>이미지 버전 표시. <code>이름:태그</code> 형식. 생략하면 <code>latest</code></td><td>라이브러리 버전 (<code>4.1.1</code>)</td></tr>
+    <tr><td><b>Dockerfile</b></td><td>이미지를 만드는 방법을 적은 텍스트 파일</td><td><code>build.gradle</code></td></tr>
+    <tr><td><b>포트 매핑</b></td><td><code>-p 호스트포트:컨테이너포트</code>. 컨테이너 안의 포트를 내 PC 포트와 연결</td><td>—</td></tr>
+    <tr><td><b>볼륨 (Volume)</b></td><td>컨테이너가 삭제돼도 데이터가 남도록 컨테이너 밖에 저장하는 공간</td><td>H2 메모리 DB → 파일 DB로 바꾸는 것</td></tr>
+    <tr><td><b>환경변수</b></td><td><code>-e 이름=값</code>. 비밀번호, DB 주소 등을 이미지 밖에서 주입</td><td><code>${GEMINI_API_KEY}</code></td></tr>
+  </table>
+  <div class="note"><div class="lbl">⚠️ 꼭 기억할 것</div>컨테이너 안에서 만든 데이터는 <b>컨테이너를 삭제하면 함께 사라집니다.</b> DB처럼 데이터를 지켜야 하는 경우에는 반드시 볼륨을 연결합니다. (5단원에서 직접 확인)</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="module" id="m3">
+  <h2><span class="num">3</span> 설치와 첫 실행</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>Windows에 Docker Desktop을 설치하고 동작을 확인할 수 있다.</li>
+  </ul></div>
+
+  <h3 class="blk">① Docker Desktop 설치 (Windows)</h3>
+  <ol>
+    <li><a href="https://www.docker.com/products/docker-desktop/" target="_blank">docker.com</a>에서 <b>Docker Desktop for Windows</b>를 내려받아 설치합니다.</li>
+    <li>설치 중 <b>"Use WSL 2 instead of Hyper-V"</b>를 선택합니다. (WSL 2가 없으면 관리자 PowerShell에서 <code>wsl --install</code> 후 재부팅)</li>
+    <li>설치 후 Docker Desktop을 실행하고, 왼쪽 아래 상태가 <b>Engine running</b>(초록색)인지 확인합니다.</li>
+  </ol>
+
+  <h3 class="blk">② 설치 확인</h3>
+  <div class="codebox"><div class="fname">PowerShell</div><pre><code>docker --version
+docker run hello-world</code></pre></div>
+  <p><code>hello-world</code>를 실행하면 도커가 다음 순서로 동작합니다.</p>
+  <div class="flow"><span class="box">내 PC에 이미지 있나?</span><span class="arr">→ 없음 →</span><span class="box">Docker Hub에서 pull</span><span class="arr">→</span><span class="box">컨테이너 생성·실행</span><span class="arr">→</span><span class="box">"Hello from Docker!" 출력 후 종료</span></div>
+  <div class="note"><div class="lbl">💡 Tip</div>명령을 입력했는데 <code>error during connect ... pipe/docker_engine</code>이 나오면 Docker Desktop이 꺼져 있는 것입니다. 먼저 Docker Desktop을 실행하세요.</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="module" id="m4">
+  <h2><span class="num">4</span> 기본 명령어</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>이미지와 컨테이너를 내려받기·실행·조회·중지·삭제할 수 있다.</li>
+  </ul></div>
+
+  <h3 class="blk">이미지 관련</h3>
+  <table>
+    <tr><th style="width:38%">명령어</th><th>설명</th></tr>
+    <tr><td><code>docker pull mysql:8.4</code></td><td>이미지 내려받기</td></tr>
+    <tr><td><code>docker images</code></td><td>내 PC의 이미지 목록</td></tr>
+    <tr><td><code>docker rmi mysql:8.4</code></td><td>이미지 삭제 (그 이미지로 만든 컨테이너가 없어야 함)</td></tr>
+    <tr><td><code>docker build -t 이름:태그 .</code></td><td>현재 폴더의 Dockerfile로 이미지 만들기</td></tr>
+  </table>
+
+  <h3 class="blk">컨테이너 관련</h3>
+  <table>
+    <tr><th style="width:38%">명령어</th><th>설명</th></tr>
+    <tr><td><code>docker run [옵션] 이미지</code></td><td>컨테이너 생성 + 실행 (이미지가 없으면 자동 pull)</td></tr>
+    <tr><td><code>docker ps</code> / <code>docker ps -a</code></td><td>실행 중인 컨테이너 / 멈춘 것까지 전체</td></tr>
+    <tr><td><code>docker stop 이름</code> / <code>docker start 이름</code></td><td>중지 / 다시 시작 (데이터 유지)</td></tr>
+    <tr><td><code>docker rm 이름</code> (<code>-f</code>: 실행 중이어도 강제)</td><td>컨테이너 삭제</td></tr>
+    <tr><td><code>docker logs -f 이름</code></td><td>컨테이너 로그 보기 (<code>-f</code>: 계속 따라가기, Ctrl+C로 빠져나옴)</td></tr>
+    <tr><td><code>docker exec -it 이름 bash</code></td><td>실행 중인 컨테이너 안으로 들어가기</td></tr>
+  </table>
+
+  <h3 class="blk"><code>docker run</code> 주요 옵션</h3>
+  <table>
+    <tr><th style="width:24%">옵션</th><th>의미</th><th style="width:30%">예</th></tr>
+    <tr><td><code>-d</code></td><td>백그라운드(detached) 실행</td><td><code>-d</code></td></tr>
+    <tr><td><code>--name</code></td><td>컨테이너 이름 지정 (없으면 무작위 이름)</td><td><code>--name mysql-blog</code></td></tr>
+    <tr><td><code>-p</code></td><td>포트 매핑 <b>호스트:컨테이너</b></td><td><code>-p 3306:3306</code></td></tr>
+    <tr><td><code>-e</code></td><td>환경변수 전달</td><td><code>-e MYSQL_ROOT_PASSWORD=1234</code></td></tr>
+    <tr><td><code>-v</code></td><td>볼륨 연결 <b>볼륨이름:컨테이너경로</b></td><td><code>-v mysql-data:/var/lib/mysql</code></td></tr>
+    <tr><td><code>--rm</code></td><td>컨테이너가 멈추면 자동 삭제 (테스트용)</td><td><code>--rm</code></td></tr>
+  </table>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="module" id="m5">
+  <h2><span class="num">5</span> 실습: 도커로 MySQL 사용하기</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>MySQL을 PC에 직접 설치하지 않고 도커 컨테이너로 실행할 수 있다.</li>
+    <li>컨테이너에 접속해 SQL을 실행하고, 볼륨으로 데이터가 유지되는 것을 확인할 수 있다.</li>
+  </ul></div>
+
+  <div class="ex"><div class="lbl">💡 도커로 DB를 쓰면 좋은 점</div><ul>
+    <li>설치 프로그램, 서비스 등록, 삭제 후 남는 찌꺼기가 없습니다.</li>
+    <li>MySQL 8.0, 8.4처럼 <b>여러 버전을 동시에</b> 띄울 수 있습니다. (포트만 다르게)</li>
+    <li>팀원 모두가 같은 명령 한 줄로 같은 DB 환경을 만듭니다.</li>
+  </ul></div>
+
+  <h3 class="part">5-1. MySQL 컨테이너 실행</h3>
+  <div class="codebox"><div class="fname">PowerShell (줄바꿈 기호: 백틱 `)</div><pre><code>docker run -d `
+  --name mysql-blog `
+  -p 3306:3306 `
+  -e MYSQL_ROOT_PASSWORD=root1234 `
+  -e MYSQL_DATABASE=blogdb `
+  -e MYSQL_USER=blog `
+  -e MYSQL_PASSWORD=blog1234 `
+  -e TZ=Asia/Seoul `
+  -v mysql-data:/var/lib/mysql `
+  mysql:8.4 `
+  --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</code></pre></div>
+  <div class="codebox"><div class="fname">한 줄 버전 (cmd · PowerShell · Mac/Linux 공통)</div><pre><code>docker run -d --name mysql-blog -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root1234 -e MYSQL_DATABASE=blogdb -e MYSQL_USER=blog -e MYSQL_PASSWORD=blog1234 -e TZ=Asia/Seoul -v mysql-data:/var/lib/mysql mysql:8.4 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci</code></pre></div>
+
+  <table>
+    <tr><th style="width:38%">부분</th><th>의미</th></tr>
+    <tr><td><code>-p 3306:3306</code></td><td>내 PC의 3306 포트로 들어온 요청을 컨테이너의 3306(MySQL)으로 전달</td></tr>
+    <tr><td><code>MYSQL_ROOT_PASSWORD</code></td><td>root 비밀번호 (<b>필수</b>, 없으면 컨테이너가 바로 종료됨)</td></tr>
+    <tr><td><code>MYSQL_DATABASE</code></td><td>처음 시작할 때 <code>blogdb</code> 데이터베이스를 자동 생성</td></tr>
+    <tr><td><code>MYSQL_USER</code> / <code>MYSQL_PASSWORD</code></td><td>앱에서 쓸 일반 계정 생성. 이 계정은 <code>blogdb</code>에 모든 권한을 가짐</td></tr>
+    <tr><td><code>-v mysql-data:/var/lib/mysql</code></td><td>MySQL 데이터 폴더를 <code>mysql-data</code> 볼륨에 저장 → 컨테이너를 지워도 데이터 유지</td></tr>
+    <tr><td><code>mysql:8.4</code></td><td>Docker Hub 공식 MySQL 이미지, 8.4(LTS) 버전</td></tr>
+    <tr><td><code>--character-set-server=...</code></td><td>이미지 이름 <b>뒤</b>에 쓰는 값은 MySQL 서버에 전달됨. 한글·이모지 저장을 위해 utf8mb4 지정</td></tr>
+  </table>
+  <div class="warn"><div class="lbl">🚨 포트 충돌 주의</div>PC에 MySQL이 이미 설치되어 실행 중이면 3306 포트를 쓰고 있어서 <code>port is already allocated</code> 오류가 납니다. 이때는 <code>-p 3307:3306</code>처럼 <b>왼쪽(호스트) 포트만</b> 바꾸고, 접속할 때 3307을 사용합니다.</div>
+
+  <h3 class="part">5-2. 실행 확인</h3>
+  <div class="codebox"><div class="fname">PowerShell</div><pre><code>docker ps                      <span class="c"># STATUS가 Up 이면 실행 중</span>
+docker logs -f mysql-blog      <span class="c"># "ready for connections" 가 보이면 접속 가능 (Ctrl+C로 나오기)</span></code></pre></div>
+  <div class="note"><div class="lbl">💡 Tip</div>처음 실행할 때는 DB 초기화 때문에 10~30초 정도 걸립니다. 로그에 <code>ready for connections</code>가 나오기 전에 접속하면 실패할 수 있습니다.</div>
+
+  <h3 class="part">5-3. 컨테이너 안에서 SQL 실행</h3>
+  <div class="codebox"><div class="fname">PowerShell</div><pre><code>docker exec -it mysql-blog mysql -u blog -p
+<span class="c"># Enter password: blog1234 입력 (화면에 표시되지 않음)</span></code></pre></div>
+  <div class="codebox"><div class="fname">mysql&gt;</div><pre><code>SHOW DATABASES;
+USE blogdb;
+
+CREATE TABLE memo (
+  id      BIGINT AUTO_INCREMENT PRIMARY KEY,
+  content VARCHAR(200),
+  created DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO memo (content) VALUES ('도커로 띄운 MySQL 😀');
+SELECT * FROM memo;
+EXIT;</code></pre></div>
+  <p>DBeaver, MySQL Workbench, IntelliJ Database 창으로도 접속할 수 있습니다.</p>
+  <table>
+    <tr><th>항목</th><th>값</th></tr>
+    <tr><td>Host</td><td><code>localhost</code></td></tr>
+    <tr><td>Port</td><td><code>3306</code> (포트를 바꿨다면 3307)</td></tr>
+    <tr><td>Database</td><td><code>blogdb</code></td></tr>
+    <tr><td>User / Password</td><td><code>blog</code> / <code>blog1234</code></td></tr>
+    <tr><td>드라이버 속성</td><td><code>allowPublicKeyRetrieval=true</code>, <code>useSSL=false</code> (Public Key Retrieval 오류가 날 때)</td></tr>
+  </table>
+
+  <h3 class="part">5-4. 볼륨으로 데이터가 유지되는지 확인</h3>
+  <div class="codebox"><div class="fname">PowerShell</div><pre><code><span class="c"># ① 컨테이너를 완전히 삭제</span>
+docker rm -f mysql-blog
+
+<span class="c"># ② 같은 볼륨(mysql-data)을 연결해 다시 실행 (5-1 명령 그대로)</span>
+docker run -d --name mysql-blog -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root1234 -e TZ=Asia/Seoul -v mysql-data:/var/lib/mysql mysql:8.4
+
+<span class="c"># ③ 데이터가 남아 있는지 확인</span>
+docker exec -it mysql-blog mysql -u blog -pblog1234 blogdb -e "SELECT * FROM memo;"</code></pre></div>
+  <p>memo 데이터가 그대로 보이면 성공입니다. 데이터는 컨테이너가 아니라 <b>볼륨</b>에 저장되어 있기 때문입니다.</p>
+  <div class="note"><div class="lbl">💡 볼륨 관련 명령</div>
+  <code>docker volume ls</code> (목록) · <code>docker volume inspect mysql-data</code> (상세) · <code>docker volume rm mysql-data</code> (삭제 — <b>DB 데이터가 영구 삭제</b>되니 주의)<br>
+  ※ <code>MYSQL_DATABASE</code>, <code>MYSQL_USER</code> 같은 초기화 환경변수는 볼륨이 <b>비어 있을 때 처음 한 번만</b> 적용됩니다. 비밀번호를 바꾸려고 환경변수만 고쳐도 기존 볼륨에는 반영되지 않습니다.</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="module" id="m6">
+  <h2><span class="num">6</span> Spring Boot와 MySQL 컨테이너 연결</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>블로그 프로젝트를 H2 대신 도커 MySQL에 연결해 실행할 수 있다.</li>
+  </ul></div>
+
+  <p>블로그 프로젝트에는 이미 <code>runtimeOnly 'com.mysql:mysql-connector-j'</code>가 <code>build.gradle</code>에 있으므로 드라이버는 추가할 필요가 없습니다. 로컬 도커 MySQL용 프로파일 파일만 하나 만듭니다.</p>
+  <div class="codebox"><div class="fname">src/main/resources/application-docker.yaml</div><pre><code><span class="c"># 로컬 도커 MySQL 전용 설정 (실행 시 프로파일 docker 활성화)</span>
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/blogdb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=Asia/Seoul&amp;characterEncoding=UTF-8
+    username: blog
+    password: blog1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update          <span class="c"># 재시작해도 테이블·데이터 유지</span>
+    show-sql: true
+  sql:
+    init:
+      mode: never               <span class="c"># H2용 data.sql은 실행하지 않음</span>
+  h2:
+    console:
+      enabled: false</code></pre></div>
+
+  <h3 class="blk">실행 방법</h3>
+  <ul>
+    <li><b>IntelliJ</b>: Run → Edit Configurations → <b>Active profiles</b>에 <code>docker</code> 입력, Environment variables에 <code>GEMINI_API_KEY=...</code></li>
+    <li><b>터미널</b>:
+      <div class="codebox"><pre><code>$env:GEMINI_API_KEY="발급받은키"
+./gradlew bootRun --args='--spring.profiles.active=docker'</code></pre></div></li>
+  </ul>
+  <p>앱 실행 후 <code>docker exec -it mysql-blog mysql -u blog -pblog1234 blogdb -e "SHOW TABLES;"</code>로 JPA가 만든 테이블(article, users 등)을 확인합니다.</p>
+  <div class="note"><div class="lbl">💡 기존 prod 프로파일과 비교</div>
+  <code>application-prod.yaml</code>(AWS RDS용)은 <code>${RDS_HOSTNAME}</code> 같은 환경변수로 접속 정보를 받습니다. 도커 MySQL도 결국 "주소만 다른 MySQL"이므로, 연결 방식은 완전히 같습니다. 바뀌는 것은 <b>호스트·포트·계정</b>뿐입니다.</div>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="module" id="m7">
+  <h2><span class="num">7</span> Docker Compose — 여러 컨테이너를 한 번에</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>긴 <code>docker run</code> 명령을 <code>compose.yaml</code> 파일로 관리할 수 있다.</li>
+    <li>컨테이너끼리 <b>서비스 이름</b>으로 통신한다는 것을 이해한다.</li>
+  </ul></div>
+
+  <p>5단원의 긴 명령을 매번 치기는 번거롭습니다. <b>Docker Compose</b>는 컨테이너 설정을 YAML 파일에 적어 두고 <code>docker compose up</code> 한 번으로 실행하게 해 줍니다. Docker Desktop에 기본 포함되어 있습니다.</p>
+
+  <h3 class="part">7-1. MySQL만 Compose로</h3>
+  <div class="codebox"><div class="fname">compose.yaml (프로젝트 루트)</div><pre><code>services:
+  db:
+    image: mysql:8.4
+    container_name: mysql-blog
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: blogdb
+      MYSQL_USER: blog
+      MYSQL_PASSWORD: blog1234
+      TZ: Asia/Seoul
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:                   <span class="c"># DB가 실제로 접속 가능한지 주기적으로 검사</span>
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  mysql-data:</code></pre></div>
+  <table>
+    <tr><th style="width:42%">명령어</th><th>설명</th></tr>
+    <tr><td><code>docker compose up -d</code></td><td>파일에 적힌 서비스 모두 실행</td></tr>
+    <tr><td><code>docker compose ps</code></td><td>상태 확인 (healthy 표시)</td></tr>
+    <tr><td><code>docker compose logs -f db</code></td><td>db 서비스 로그</td></tr>
+    <tr><td><code>docker compose down</code></td><td>컨테이너 중지·삭제 (볼륨은 유지)</td></tr>
+    <tr><td><code>docker compose down -v</code></td><td>볼륨까지 삭제 → <b>DB 초기화</b></td></tr>
+  </table>
+  <div class="note"><div class="lbl">💡</div>5단원에서 <code>docker run</code>으로 만든 <code>mysql-blog</code> 컨테이너가 남아 있으면 이름이 겹쳐 오류가 납니다. 먼저 <code>docker rm -f mysql-blog</code>로 지우세요.</div>
+
+  <h3 class="part">7-2. 블로그 앱 + MySQL 함께 실행</h3>
+  <p>8단원의 Dockerfile이 있으면 앱도 컨테이너로 만들어 DB와 함께 띄울 수 있습니다.</p>
+  <div class="codebox"><div class="fname">compose.yaml (db 아래에 app 서비스 추가)</div><pre><code>  app:
+    build: .                       <span class="c"># 현재 폴더의 Dockerfile로 이미지 빌드</span>
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: render
+      DB_URL: jdbc:mysql://db:3306/blogdb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=Asia/Seoul&amp;characterEncoding=UTF-8
+      DB_USERNAME: blog
+      DB_PASSWORD: blog1234
+      GEMINI_API_KEY: ${GEMINI_API_KEY}   <span class="c"># PC의 환경변수 또는 .env 파일 값</span>
+    depends_on:
+      db:
+        condition: service_healthy   <span class="c"># DB가 healthy가 된 뒤에 앱 시작</span></code></pre></div>
+  <div class="warn"><div class="lbl">🚨 가장 많이 틀리는 부분: localhost가 아니라 db</div>
+  컨테이너 안에서 <code>localhost</code>는 <b>그 컨테이너 자신</b>을 뜻합니다. app 컨테이너 안에는 MySQL이 없으므로 <code>localhost:3306</code>으로는 접속할 수 없습니다. Compose는 서비스들을 같은 네트워크로 묶고 <b>서비스 이름(<code>db</code>)을 호스트 이름으로</b> 쓸 수 있게 해 줍니다.
+  <table style="margin-top:10px"><tr><th>어디서 접속?</th><th>DB 주소</th></tr>
+  <tr><td>내 PC의 IntelliJ에서 실행한 앱 (6단원)</td><td><code>localhost:3306</code></td></tr>
+  <tr><td>Compose 안의 app 컨테이너</td><td><code>db:3306</code></td></tr></table></div>
+  <p><code>SPRING_PROFILES_ACTIVE: render</code>는 3강 5단원에서 만든 <code>application-render.yaml</code>(접속 정보를 <code>DB_URL</code>·<code>DB_USERNAME</code>·<code>DB_PASSWORD</code> 환경변수로 받는 파일)을 그대로 재사용한다는 뜻입니다. Render 배포 전에 <b>내 PC에서 운영과 같은 구성으로 미리 테스트</b>할 수 있습니다.</p>
+  <div class="codebox"><div class="fname">PowerShell</div><pre><code>$env:GEMINI_API_KEY="발급받은키"
+docker compose up -d --build    <span class="c"># --build: 코드가 바뀌었으면 이미지 다시 빌드</span>
+docker compose logs -f app      <span class="c"># Started BlogApplication 확인 후 http://localhost:8080</span></code></pre></div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="module" id="m8">
+  <h2><span class="num">8</span> 블로그 배포용 Dockerfile 해설</h2>
+  <div class="goal"><div class="lbl">🎯 학습목표</div><ul>
+    <li>Render 배포(3강 5단원)에 사용한 Dockerfile을 한 줄씩 설명할 수 있다.</li>
+    <li>멀티 스테이지 빌드를 쓰는 이유를 설명할 수 있다.</li>
+    <li>만든 이미지를 내 PC에서 직접 빌드·실행해 볼 수 있다.</li>
+  </ul></div>
+
+  <h3 class="part">8-1. 전체 코드</h3>
+  <div class="codebox"><div class="fname">Dockerfile (프로젝트 루트, 확장자 없음)</div><pre><code><span class="c"># ① 빌드 단계: JDK 21로 Gradle 빌드 → 실행 가능한 jar 만들기</span>
+<span class="k">FROM</span> eclipse-temurin:21-jdk AS build
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> . .
+<span class="k">RUN</span> chmod +x gradlew &amp;&amp; ./gradlew clean bootJar -x test --no-daemon
+
+<span class="c"># ② 실행 단계: 가벼운 JRE 21 이미지에 jar만 복사</span>
+<span class="k">FROM</span> eclipse-temurin:21-jre
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> --from=build /app/build/libs/*.jar app.jar
+<span class="c"># 무료 인스턴스 메모리 512MB에 맞춰 자바 힙 제한 (Dockerfile은 줄 끝 주석 불가)</span>
+<span class="k">ENV</span> JAVA_OPTS=<span class="s">"-Xmx300m"</span>
+<span class="k">EXPOSE</span> 8080
+<span class="k">ENTRYPOINT</span> [<span class="s">"sh"</span>, <span class="s">"-c"</span>, <span class="s">"java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"</span>]</code></pre></div>
+  <div class="codebox"><div class="fname">.dockerignore (Dockerfile 옆)</div><pre><code>build/
+out/
+.gradle/
+.idea/
+uploads/
+*.iml</code></pre></div>
+
+  <h3 class="part">8-2. 멀티 스테이지 빌드란?</h3>
+  <p>이 Dockerfile에는 <code>FROM</code>이 <b>두 번</b> 나옵니다. 첫 번째 단계에서 jar를 만들고, 두 번째 단계에서는 <b>만들어진 jar만</b> 가져와 새 이미지를 만듭니다. 첫 번째 단계의 소스 코드, Gradle 캐시, JDK는 최종 이미지에 들어가지 않습니다.</p>
+  <div class="ms">
+    <div class="stage"><b>① build 단계 (eclipse-temurin:21-jdk)</b>소스 코드 전체<br>Gradle + 의존성 라이브러리<br>JDK(컴파일러 포함)<br>→ <code>build/libs/blog-0.0.1-SNAPSHOT.jar</code></div>
+    <div class="big">➜<br><small style="font-size:.7rem">jar만<br>복사</small></div>
+    <div class="stage"><b>② 실행 단계 (eclipse-temurin:21-jre)</b>JRE(실행만 가능)<br><code>app.jar</code> 하나<br><br>→ <b>최종 이미지</b> (작고 안전)</div>
+  </div>
+  <table>
+    <tr><th></th><th>한 단계로 만들면</th><th>멀티 스테이지</th></tr>
+    <tr><td>이미지 크기</td><td>JDK + 소스 + Gradle 캐시까지 포함 → 큼</td><td>JRE + jar만 → 작음</td></tr>
+    <tr><td>보안</td><td>소스 코드가 이미지에 그대로 남음</td><td>소스 코드가 없음</td></tr>
+    <tr><td>배포 속도</td><td>업로드·다운로드 느림</td><td>빠름</td></tr>
+  </table>
+  <div class="note"><div class="lbl">💡 JDK vs JRE</div><b>JDK</b>(Java Development Kit)는 컴파일러(javac)를 포함한 개발 도구 세트이고, <b>JRE</b>(Java Runtime Environment)는 이미 만들어진 프로그램을 <b>실행만</b> 하는 환경입니다. 빌드에는 JDK, 실행에는 JRE면 충분합니다.</div>
+
+  <h3 class="part">8-3. 한 줄씩 해설</h3>
+  <table>
+    <tr><th style="width:40%">코드</th><th>설명</th></tr>
+    <tr><td><code>FROM eclipse-temurin:21-jdk AS build</code></td><td>Eclipse 재단이 배포하는 OpenJDK 21 이미지에서 시작. <code>AS build</code>로 이 단계에 이름을 붙여 뒤에서 <code>--from=build</code>로 참조. 프로젝트의 <code>languageVersion = 21</code>과 버전을 맞춤</td></tr>
+    <tr><td><code>WORKDIR /app</code></td><td>컨테이너 안 작업 폴더를 <code>/app</code>으로 지정(없으면 생성). 이후 명령은 이 폴더에서 실행 — <code>cd /app</code>과 같은 효과</td></tr>
+    <tr><td><code>COPY . .</code></td><td>앞의 <code>.</code> = 내 PC의 현재 폴더(빌드 컨텍스트), 뒤의 <code>.</code> = 컨테이너의 <code>/app</code>. 프로젝트 전체를 복사하되 <code>.dockerignore</code>에 적힌 것은 제외</td></tr>
+    <tr><td><code>RUN chmod +x gradlew</code></td><td>Windows에서 만든 <code>gradlew</code> 파일은 리눅스 실행 권한이 없을 수 있어 <code>Permission denied</code>가 남. 실행 권한 부여</td></tr>
+    <tr><td><code>./gradlew clean bootJar</code></td><td>이전 빌드 결과를 지우고, 내장 톰캣이 포함된 <b>실행 가능한 jar</b>를 <code>build/libs/</code>에 생성</td></tr>
+    <tr><td><code>-x test</code></td><td>테스트 단계 제외(<b>exclude</b>). 테스트가 DB·API 키 등을 필요로 하면 빌드 중 실패할 수 있기 때문. 테스트는 배포 전에 로컬에서 따로 실행</td></tr>
+    <tr><td><code>--no-daemon</code></td><td>Gradle 데몬(백그라운드 프로세스)을 띄우지 않음. 한 번 빌드하고 끝나는 컨테이너에서는 데몬이 메모리만 차지</td></tr>
+    <tr><td><code>FROM eclipse-temurin:21-jre</code></td><td><b>두 번째 단계 시작.</b> 앞 단계 내용은 모두 버리고 실행 전용 JRE 이미지에서 새로 시작</td></tr>
+    <tr><td><code>COPY --from=build /app/build/libs/*.jar app.jar</code></td><td>build 단계의 결과물 중 jar만 가져와 <code>app.jar</code>로 이름을 바꿔 저장. 버전이 바뀌어도(<code>blog-0.0.2.jar</code>) 실행 명령을 고칠 필요가 없음</td></tr>
+    <tr><td><code>ENV JAVA_OPTS="-Xmx300m"</code></td><td>환경변수 기본값 설정. 자바 힙 최대 크기를 300MB로 제한 → Render 무료 인스턴스(512MB RAM)에서 메모리 초과로 종료되는 것을 방지. 실행 시 <code>-e JAVA_OPTS=...</code>로 덮어쓸 수 있음</td></tr>
+    <tr><td><code>EXPOSE 8080</code></td><td>"이 컨테이너는 8080 포트를 사용한다"는 <b>문서 역할</b>. 실제로 포트를 여는 것은 <code>docker run -p</code></td></tr>
+    <tr><td><code>ENTRYPOINT [...]</code></td><td>컨테이너가 시작될 때 실행할 명령. 아래 8-4 참고</td></tr>
+  </table>
+
+  <h3 class="part">8-4. ENTRYPOINT를 자세히</h3>
+  <div class="codebox"><pre><code><span class="k">ENTRYPOINT</span> [<span class="s">"sh"</span>, <span class="s">"-c"</span>, <span class="s">"java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"</span>]</code></pre></div>
+  <ul>
+    <li><b>왜 <code>sh -c</code>로 감쌌나?</b> — <code>["java", "$JAVA_OPTS", ...]</code>처럼 쓰면 도커는 셸 없이 바로 java를 실행하므로 <code>$JAVA_OPTS</code>가 <b>글자 그대로</b> 전달됩니다. <code>sh -c</code>로 셸을 거쳐야 환경변수가 실제 값으로 바뀝니다.</li>
+    <li><b><code>${PORT:-8080}</code></b> — 셸 문법으로 "<code>PORT</code> 환경변수가 있으면 그 값, 없으면 8080". Render는 앱이 사용할 포트를 <code>PORT</code> 환경변수로 알려 줍니다. 로컬에서는 PORT가 없으니 8080으로 실행됩니다.</li>
+    <li><b><code>-Dserver.port=...</code></b> — 자바 시스템 속성으로 Spring Boot의 <code>server.port</code>를 지정. <code>application.yaml</code>의 값보다 우선합니다.</li>
+  </ul>
+  <div class="ex"><div class="lbl">💡 실제로 실행되는 명령</div>
+  <table style="margin:6px 0 0"><tr><th>환경</th><th>최종 명령</th></tr>
+  <tr><td>로컬 (PORT 없음)</td><td><code>java -Xmx300m -Dserver.port=8080 -jar app.jar</code></td></tr>
+  <tr><td>Render (PORT=10000일 때)</td><td><code>java -Xmx300m -Dserver.port=10000 -jar app.jar</code></td></tr></table></div>
+
+  <h3 class="part">8-5. .dockerignore</h3>
+  <p><code>COPY . .</code>로 복사할 때 빼야 할 파일 목록입니다. <code>.gitignore</code>와 문법이 같습니다.</p>
+  <table>
+    <tr><th style="width:24%">항목</th><th>제외하는 이유</th></tr>
+    <tr><td><code>build/</code>, <code>out/</code></td><td>로컬 빌드 결과물. 컨테이너 안에서 새로 빌드하므로 불필요하고, 남아 있으면 <code>*.jar</code>가 여러 개 잡혀 혼란</td></tr>
+    <tr><td><code>.gradle/</code></td><td>로컬 Gradle 캐시. 용량이 크고 OS마다 달라 오히려 문제를 일으킴</td></tr>
+    <tr><td><code>.idea/</code>, <code>*.iml</code></td><td>IntelliJ 설정 파일. 실행과 무관</td></tr>
+    <tr><td><code>uploads/</code></td><td>로컬에서 업로드한 테스트 이미지. 이미지에 넣을 필요 없음</td></tr>
+  </table>
+  <div class="note"><div class="lbl">💡 추가하면 좋은 항목</div><code>.git/</code>(커밋 기록, 용량 큼), <code>.env</code>(비밀번호·API 키가 이미지에 들어가지 않도록)</div>
+
+  <h3 class="part">8-6. 내 PC에서 빌드·실행해 보기</h3>
+  <div class="codebox"><div class="fname">PowerShell (Dockerfile이 있는 프로젝트 폴더에서)</div><pre><code><span class="c"># ① 이미지 빌드 (-t: 이름:태그, 마지막 . = 빌드 컨텍스트)</span>
+docker build -t blog-app:1.0 .
+
+<span class="c"># ② 이미지 확인 (JRE 기반이라 JDK 이미지보다 훨씬 작음)</span>
+docker images blog-app
+
+<span class="c"># ③ H2(기본 프로파일)로 실행 — DB 없이 바로 확인</span>
+docker run --rm -p 8080:8080 -e GEMINI_API_KEY=발급받은키 blog-app:1.0
+
+<span class="c"># ④ PORT 환경변수 동작 확인 — 컨테이너는 9000, 내 PC는 8081</span>
+docker run --rm -p 8081:9000 -e PORT=9000 -e GEMINI_API_KEY=발급받은키 blog-app:1.0</code></pre></div>
+  <p>③은 <code>http://localhost:8080</code>, ④는 <code>http://localhost:8081</code>로 접속합니다. 로그에 <code>Tomcat started on port 9000</code>이 보이면 <code>${PORT:-8080}</code>이 제대로 동작한 것입니다.</p>
+  <div class="warn"><div class="lbl">🚨 GEMINI_API_KEY를 빠뜨리면</div><code>application.yaml</code>에 <code>api-key: ${GEMINI_API_KEY}</code>가 있어서, 값이 없으면 앱이 시작하지 못하고 <code>Could not resolve placeholder 'GEMINI_API_KEY'</code> 오류로 종료됩니다. 도커 이미지에는 키를 넣지 않고, <b>실행할 때 <code>-e</code>로 주입</b>하는 것이 원칙입니다.</div>
+
+  <h3 class="part">8-7. 한 단계 더: 빌드 캐시 활용</h3>
+  <p>도커는 Dockerfile의 각 줄을 <b>레이어</b>로 저장하고, 내용이 바뀌지 않은 줄은 다시 실행하지 않습니다(캐시). 지금 Dockerfile은 <code>COPY . .</code>로 전부 복사하므로, Java 파일 한 줄만 고쳐도 <b>의존성 다운로드부터 전부 다시</b> 합니다. 다음처럼 바꾸면 <code>build.gradle</code>이 바뀌지 않는 한 의존성 다운로드를 건너뜁니다.</p>
+  <div class="codebox"><div class="fname">Dockerfile — build 단계 개선판</div><pre><code><span class="k">FROM</span> eclipse-temurin:21-jdk AS build
+<span class="k">WORKDIR</span> /app
+<span class="c"># 1) 자주 안 바뀌는 빌드 설정 파일만 먼저 복사 → 의존성 다운로드 (캐시됨)</span>
+<span class="k">COPY</span> gradlew settings.gradle build.gradle ./
+<span class="k">COPY</span> gradle gradle
+<span class="k">RUN</span> chmod +x gradlew &amp;&amp; ./gradlew dependencies --no-daemon
+<span class="c"># 2) 자주 바뀌는 소스 코드는 나중에 복사</span>
+<span class="k">COPY</span> src src
+<span class="k">RUN</span> ./gradlew bootJar -x test --no-daemon</code></pre></div>
+  <p>실행 단계(두 번째 <code>FROM</code> 이하)는 그대로 둡니다. 두 번째 빌드부터 시간이 눈에 띄게 줄어듭니다.</p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="module" id="m9">
+  <h2><span class="num">9</span> 자주 만나는 오류</h2>
+  <table>
+    <tr><th style="width:38%">오류 메시지</th><th>원인과 해결</th></tr>
+    <tr><td><code>error during connect ... docker_engine</code></td><td>Docker Desktop이 꺼져 있음 → 실행 후 Engine running 확인</td></tr>
+    <tr><td><code>port is already allocated</code></td><td>호스트 포트를 다른 프로그램이 사용 중 → <code>-p 3307:3306</code>처럼 왼쪽 포트 변경</td></tr>
+    <tr><td><code>Conflict. The container name ... is already in use</code></td><td>같은 이름의 컨테이너가 있음 → <code>docker rm -f 이름</code></td></tr>
+    <tr><td>MySQL 컨테이너가 바로 Exited</td><td><code>MYSQL_ROOT_PASSWORD</code> 누락 → <code>docker logs 이름</code>으로 원인 확인</td></tr>
+    <tr><td><code>Public Key Retrieval is not allowed</code></td><td>JDBC URL에 <code>allowPublicKeyRetrieval=true</code> 추가</td></tr>
+    <tr><td><code>Communications link failure</code> (컨테이너 안 앱)</td><td>DB 주소를 <code>localhost</code>로 씀 → Compose 서비스 이름(<code>db</code>)으로 변경. 또는 DB가 아직 준비 전 → healthcheck + <code>depends_on</code></td></tr>
+    <tr><td><code>./gradlew: Permission denied</code></td><td>실행 권한 없음 → <code>chmod +x gradlew</code></td></tr>
+    <tr><td><code>/bin/sh^M: bad interpreter</code></td><td>Windows 줄바꿈(CRLF)이 <code>gradlew</code>에 들어감 → IntelliJ 오른쪽 아래에서 <b>LF</b>로 변경 후 저장</td></tr>
+    <tr><td>한글이 <code>???</code>로 저장됨</td><td>MySQL 문자셋 → <code>--character-set-server=utf8mb4</code> 옵션으로 실행 (볼륨 새로 만들어야 할 수 있음)</td></tr>
+  </table>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="module" id="m10">
+  <h2><span class="num">10</span> 실습문제</h2>
+  <div class="lab"><div class="lbl">🛠 실습 1 — 버전이 다른 MySQL 두 개 띄우기</div>
+  <p><code>mysql:8.0</code>은 3307, <code>mysql:8.4</code>는 3308 포트로 동시에 실행하고, 각각 접속해 <code>SELECT VERSION();</code> 결과를 비교하세요. (볼륨 이름도 서로 다르게)</p></div>
+  <div class="lab"><div class="lbl">🛠 실습 2 — 볼륨 없이 실행하면?</div>
+  <p><code>-v</code> 옵션 없이 MySQL 컨테이너를 실행해 테이블과 데이터를 넣은 뒤, 컨테이너를 삭제하고 다시 만들어 보세요. 데이터가 어떻게 되는지, 5-4와 무엇이 다른지 설명하세요.</p></div>
+  <div class="lab"><div class="lbl">🛠 실습 3 — 블로그를 도커 MySQL에 연결</div>
+  <p>6단원대로 <code>application-docker.yaml</code>을 만들어 블로그를 실행하고, 화면에서 글을 3개 작성한 뒤 <code>docker exec</code>로 article 테이블을 조회해 같은 데이터가 있는지 확인하세요.</p></div>
+  <div class="lab"><div class="lbl">🛠 실습 4 — Compose로 전체 실행</div>
+  <p>7-2의 <code>compose.yaml</code>로 블로그 앱과 MySQL을 함께 띄우세요. 그다음 <code>DB_URL</code>의 <code>db</code>를 <code>localhost</code>로 바꿔 실행하고, 어떤 오류가 나는지 로그로 확인한 뒤 원인을 설명하세요.</p></div>
+  <div class="lab"><div class="lbl">🛠 실습 5 — Dockerfile 개선 (도전)</div>
+  <ul>
+    <li>8-7의 캐시 개선판을 적용하고, Java 파일을 한 줄 고친 뒤 <code>docker build</code> 시간을 개선 전과 비교하세요.</li>
+    <li><code>.dockerignore</code>에 <code>.git/</code>, <code>.env</code>를 추가하세요.</li>
+    <li><code>docker run -e JAVA_OPTS="-Xmx200m" ...</code>로 힙 크기를 바꿔 실행해 보고, ENV 기본값이 어떻게 덮어써지는지 설명하세요.</li>
+  </ul></div>
+</section>
+
+</div>
+<script>
+document.querySelectorAll('pre').forEach(function(pre){
+  var box=pre.closest('.codebox'); if(!box) return;
+  var b=document.createElement('button'); b.className='copy'; b.textContent='복사';
+  if(box.querySelector('.fname')) b.style.top='34px';
+  b.onclick=function(){
+    var t=pre.innerText.split('\n').map(function(l){return l.replace(/\s+# .*$/,'')}).join('\n');
+    if(pre.querySelector('.k')) t=pre.innerText;
+    try{navigator.clipboard.writeText(t).then(function(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사'},1200)})}catch(e){}
+  };
+  box.appendChild(b);
+});
+</script>
+</body>
+</html>
