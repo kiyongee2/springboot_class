@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게시판 React UI (boardweb)</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--ink:#1f2933;--muted:#52606d;--line:#e4e7eb;--accent:#6db33f;--accent2:#2c3e50;--code-bg:#282c34;--goal:#eafaf1;--goal-line:#27ae60;--ex:#eef4ff;--ex-line:#5b8def;--lab:#fff5e9;--lab-line:#e76f00;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","맑은 고딕",-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.75;}
+  header.hero{background:linear-gradient(135deg,#6db33f,#2c3e50);color:#fff;padding:52px 24px;text-align:center;}
+  header.hero .eyebrow{letter-spacing:3px;font-size:.78rem;opacity:.9;text-transform:uppercase}
+  header.hero h1{margin:12px 0 8px;font-size:1.9rem}header.hero p{margin:0;opacity:.92}
+  header.hero .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  header.hero .tags span{background:rgba(255,255,255,.16);border-radius:999px;padding:5px 13px;font-size:.82rem}
+  .wrap{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 26px;margin-bottom:34px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  nav.toc h2{margin:0 0 12px;font-size:1.05rem;color:var(--accent2)}
+  nav.toc ol{margin:0;padding-left:22px;columns:2;column-gap:34px}
+  nav.toc a{color:var(--ink);text-decoration:none}nav.toc a:hover{color:var(--accent);text-decoration:underline}
+  section.module{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin-bottom:26px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
+  section.module > h2{margin:0 0 6px;font-size:1.4rem;color:var(--accent2);display:flex;align-items:center;gap:12px;}
+  section.module > h2 .num{background:var(--accent);color:#fff;font-size:.95rem;font-weight:800;padding:4px 12px;border-radius:10px;min-width:38px;text-align:center;}
+  h3.blk{font-size:1.02rem;margin:22px 0 8px;font-weight:800}
+  h3.part{font-size:1.15rem;margin:30px 0 12px;padding:8px 12px;background:#f0f7ea;border-left:5px solid var(--accent);border-radius:4px;color:var(--accent2)}
+  .goal{background:var(--goal);border-left:5px solid var(--goal-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:14px 0}
+  .goal .lbl{font-weight:800;color:#1e874b}.goal ul{margin:8px 0 0}
+  .concept{margin:16px 0}
+  .concept h3.blk{color:var(--ink);border-left:4px solid var(--accent);padding-left:10px}
+  .ex{background:var(--ex);border-left:5px solid var(--ex-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .ex .lbl{font-weight:800;color:#2f5fc7}
+  .lab{background:var(--lab);border-left:5px solid var(--lab-line);border-radius:0 10px 10px 0;padding:14px 20px;margin:16px 0}
+  .lab .lbl{font-weight:800;color:#c85f00}.lab h4{margin:6px 0 6px;font-size:.98rem}
+  .note{background:#fffbea;border-left:5px solid #f0c000;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .note .lbl{font-weight:800;color:#a67c00}
+  ul{margin:8px 0}li{margin:5px 0}.muted{color:var(--muted)}
+  code{background:#eceef1;padding:2px 6px;border-radius:5px;font-size:.92em;font-family:Consolas,"D2Coding",monospace}
+  pre{background:var(--code-bg);color:#abb2bf;border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:Consolas,"D2Coding",monospace;font-size:.9rem;line-height:1.6;margin:10px 0;white-space:pre-wrap;word-break:break-word}
+  pre .k{color:#c678dd}pre .t{color:#e5c07b}pre .s{color:#98c379}pre .c{color:#7f848e;font-style:italic}pre .f{color:#61afef}pre .n{color:#d19a66}pre .g{color:#56b6c2}pre .a{color:#e06c75}
+  .out{background:#1b1e24;color:#9fd18a;border-radius:8px;padding:10px 14px;font-family:Consolas,"D2Coding",monospace;font-size:.86rem;margin:6px 0 0;white-space:pre-wrap}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.93rem}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#f0f4f8;color:var(--accent2)}td.c,th.c{text-align:center}
+  .method{font-weight:800;border-radius:6px;padding:2px 8px;font-size:.82rem;color:#fff}
+  .m-get{background:#2f8f4e}.m-post{background:#d98a00}.m-put{background:#2f5fc7}.m-del{background:#c0392b}
+  figure{margin:14px 0;text-align:center}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:30px 20px}
+  .pill{display:inline-block;background:#eceef1;border-radius:6px;padding:2px 9px;margin:2px;font-size:.85rem}
+
+  details{margin:8px 0}summary{cursor:pointer;font-weight:700;color:#c85f00}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .flow span.box{background:#f0f4f8;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.88rem}
+  .flow span.arr{color:#e76f00;font-weight:800}
+  .warn{background:#fdecea;border-left:5px solid #c0392b;border-radius:0 10px 10px 0;padding:12px 18px;margin:14px 0}
+  .warn .lbl{font-weight:800;color:#a93226}
+  @media (max-width:640px){table{display:block;overflow-x:auto}code{word-break:break-all}nav.toc ol{columns:1}section.module{padding:20px 18px}header.hero h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">Java 웹 &amp; Spring Boot · React · boardweb 후속편 · 학습 교안</div>
+  <h1>게시판 React UI (boardweb)</h1>
+  <p>boardweb REST API를 JWT 인증 서버로 바꾸고, React(Vite · TypeScript)로 게시판 화면 만들기 — 회원가입 · 로그인 · 목록 · 검색 · 상세 · 글쓰기 · 수정 · 삭제</p>
+  <div class="tags"><span>🔑 JWT</span><span>🔐 Spring Security</span><span>🍃 Spring Boot 4</span><span>⚛️ React 19</span><span>🟦 TypeScript</span><span>⚡ Vite</span><span>🧭 React Router</span><span>📡 axios</span><span>🎨 Bootstrap</span></div>
+</header>
+<div class="wrap">
+  
+  <nav class="toc"><h2>📚 학습 목차</h2><ol start="1"><li><a href="#m1">개요 · 세션 방식과 JWT 방식</a></li><li><a href="#m2">JWT 개념 · 인증 흐름</a></li><li><a href="#m3">서버 ① JJWT 의존성 · 토큰 설정</a></li><li><a href="#m4">서버 ② TokenProvider — 토큰 발급 · 검사</a></li><li><a href="#m5">서버 ③ TokenAuthenticationFilter · SecurityConfig</a></li><li><a href="#m6">서버 ④ 로그인 API · 오류 응답 · Postman</a></li><li><a href="#m7">React ① 프로젝트 만들기 · 폴더 구조</a></li><li><a href="#m8">React ② 타입 · axios 인터셉터 · API 함수</a></li><li><a href="#m9">React ③ 로그인 상태 · 라우팅</a></li><li><a href="#m10">React ④ 회원가입 · 로그인 화면</a></li><li><a href="#m11">React ⑤ 게시판 화면 — 목록 · 검색 · 상세 · 글쓰기</a></li><li><a href="#m12">실행 확인 · 자주 나는 오류</a></li></ol></nav>
+  <section class="module" id="m1"><h2><span class="num">1</span> 개요 · 세션 방식과 JWT 방식</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>boardweb 서버를 React 화면이 쓰는 API 서버로 바꾸는 이유와 전체 구조를 설명할 수 있다.</li><li>세션 방식(6장)과 JWT 방식의 차이를 설명할 수 있다.</li></ul></div><h3 class="part">1-1. 무엇을 만드는가</h3><div class="concept"><h3 class="blk">📖 완성할 기능</h3><p>스프링부트 교안 4~6장에서 만든 <b>boardweb</b>(REST API · 검색 · 회원 · 스프링 시큐리티)을 백엔드로 쓰고, 화면은 <b>React + TypeScript</b>로 새로 만든다. 로그인은 <b>JWT(JSON Web Token)</b> 방식으로 바꾼다.</p><table><thead><tr><th>구분</th><th>기술</th><th>폴더 · 주소</th></tr></thead><tbody><tr><td>프론트엔드</td><td>React 19 · TypeScript · Vite · React Router · axios · dayjs · Bootstrap</td><td><code>boardweb-client/</code> · <code>http://localhost:5173</code></td></tr><tr><td>백엔드</td><td>Spring Boot 4 · Spring Data JPA · Spring Security · JJWT</td><td><code>boardweb/</code> · <code>http://localhost:8080</code></td></tr><tr><td>DB</td><td>MySQL</td><td><code>springdb</code> · 테이블 <code>post</code> · <code>users</code></td></tr></tbody></table></div><figure style="margin:1.2rem auto;max-width:860px"><svg viewBox="0 0 860 300" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard, 'Malgun Gothic', sans-serif">
+<defs><marker id="ra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:#52606d"/></marker></defs>
+<rect x="10" y="40" width="250" height="220" rx="12" style="fill:#eef6ff;stroke:#5b8def;stroke-width:1.6"/>
+<text x="135" y="66" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2933">boardweb-client — React</text>
+<text x="135" y="86" text-anchor="middle" font-size="12.5" fill="#52606d">http://localhost:5173</text>
+<rect x="30" y="102" width="210" height="34" rx="7" style="fill:#fff;stroke:#9cb8f0"/><text x="135" y="124" text-anchor="middle" font-size="13" fill="#1f2933">화면 (pages/*.tsx)</text>
+<rect x="30" y="146" width="210" height="34" rx="7" style="fill:#fff;stroke:#9cb8f0"/><text x="135" y="168" text-anchor="middle" font-size="13" fill="#1f2933">AuthContext (로그인 상태)</text>
+<rect x="30" y="190" width="210" height="34" rx="7" style="fill:#fff;stroke:#9cb8f0"/><text x="135" y="212" text-anchor="middle" font-size="13" fill="#1f2933">axios + 토큰 인터셉터</text>
+<rect x="330" y="40" width="300" height="220" rx="12" style="fill:#eef8e8;stroke:#6db33f;stroke-width:1.6"/>
+<text x="480" y="66" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2933">boardweb — Spring Boot</text>
+<text x="480" y="86" text-anchor="middle" font-size="12.5" fill="#52606d">http://localhost:8080/api</text>
+<rect x="350" y="102" width="260" height="30" rx="7" style="fill:#fff;stroke:#a9d38e"/><text x="480" y="122" text-anchor="middle" font-size="13" fill="#1f2933">TokenAuthenticationFilter (JWT 검사)</text>
+<rect x="350" y="138" width="260" height="30" rx="7" style="fill:#fff;stroke:#a9d38e"/><text x="480" y="158" text-anchor="middle" font-size="13" fill="#1f2933">AuthApiController · PostApiController</text>
+<rect x="350" y="174" width="260" height="30" rx="7" style="fill:#fff;stroke:#a9d38e"/><text x="480" y="194" text-anchor="middle" font-size="13" fill="#1f2933">UserService · PostService</text>
+<rect x="350" y="210" width="260" height="30" rx="7" style="fill:#fff;stroke:#a9d38e"/><text x="480" y="230" text-anchor="middle" font-size="13" fill="#1f2933">UserRepository · PostRepository</text>
+<rect x="700" y="110" width="150" height="80" rx="12" style="fill:#2c3e50"/>
+<text x="775" y="145" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">MySQL</text>
+<text x="775" y="166" text-anchor="middle" font-size="12.5" fill="#dfe6ee">springdb · post · users</text>
+<line x1="242" y1="200" x2="326" y2="125" style="stroke:#52606d;stroke-width:1.8" marker-end="url(#ra)"/>
+<line x1="328" y1="175" x2="244" y2="214" style="stroke:#9aa5b1;stroke-width:1.6;stroke-dasharray:5 4" marker-end="url(#ra)"/>
+<text x="282" y="148" text-anchor="middle" font-size="12" fill="#52606d">요청</text>
+<text x="282" y="162" text-anchor="middle" font-size="11" fill="#52606d">+ Bearer 토큰</text>
+<text x="285" y="236" text-anchor="middle" font-size="12" fill="#52606d">JSON 응답</text>
+<line x1="612" y1="225" x2="696" y2="160" style="stroke:#52606d;stroke-width:1.8" marker-end="url(#ra)"/>
+<text x="650" y="210" text-anchor="middle" font-size="12" fill="#52606d">SQL</text>
+<text x="430" y="290" text-anchor="middle" font-size="13" fill="#52606d">두 서버를 따로 실행한다 — React(5173) · Spring Boot(8080). 로그인 정보는 쿠키가 아니라 요청 헤더의 토큰으로 전달한다.</text>
+</svg><figcaption class="muted" style="text-align:center">React 화면 → axios(토큰 헤더) → JWT 필터 → REST API → JPA → MySQL</figcaption></figure><table><thead><tr><th>기능</th><th>화면 주소 (React)</th><th>API (Spring Boot)</th><th>로그인</th></tr></thead><tbody><tr><td>메인</td><td><code>/</code></td><td><code>GET /api/posts</code></td><td>—</td></tr><tr><td>글 목록 · 검색</td><td><code>/posts</code> · <code>/posts?type=title&amp;keyword=가입</code></td><td><code>GET /api/posts?type=…&amp;keyword=…</code></td><td>—</td></tr><tr><td>글 상세</td><td><code>/posts/1</code></td><td><code>GET /api/posts/1</code></td><td>—</td></tr><tr><td>글쓰기</td><td><code>/posts/new</code></td><td><code>POST /api/posts</code></td><td>필요</td></tr><tr><td>글 수정</td><td><code>/posts/1/edit</code></td><td><code>PUT /api/posts/1</code></td><td>본인</td></tr><tr><td>글 삭제</td><td>상세 화면의 삭제 버튼</td><td><code>DELETE /api/posts/1</code></td><td>본인</td></tr><tr><td>회원가입</td><td><code>/signup</code></td><td><code>POST /api/auth/signup</code></td><td>—</td></tr><tr><td>로그인</td><td><code>/login</code></td><td><code>POST /api/auth/login</code> → 토큰</td><td>—</td></tr></tbody></table><h3 class="part">1-2. 세션 방식(6장) vs JWT 방식</h3><div class="concept"><h3 class="blk">📖 왜 JWT로 바꾸나</h3><p>6장의 폼 로그인은 <b>서버가 화면(HTML)을 만들고</b>, 로그인 정보를 서버 <b>세션</b>에 저장한 뒤 브라우저에 <b>쿠키</b>(JSESSIONID)를 준다. React는 화면을 직접 그리고 서버와는 <b>JSON만</b> 주고받으므로, 로그인 결과도 화면 이동이 아니라 <b>JSON(토큰)</b>으로 받는 방식이 잘 맞는다.</p><table><thead><tr><th></th><th>세션 방식 (6장)</th><th>JWT 방식 (이 교안)</th></tr></thead><tbody><tr><td>로그인 정보 저장</td><td>서버 메모리(세션)</td><td><b>토큰 안</b>에 아이디 · 만료 시각을 담아 클라이언트가 보관</td></tr><tr><td>요청마다 보내는 것</td><td>쿠키 <code>JSESSIONID</code> (브라우저가 자동)</td><td>헤더 <code>Authorization: Bearer 토큰</code> (코드로 직접)</td></tr><tr><td>서버 상태</td><td>있음 (stateful)</td><td>없음 (<b>stateless</b>) — 토큰만 검사</td></tr><tr><td>로그인 · 실패 응답</td><td>화면 이동 (302)</td><td>JSON (200 · 401)</td></tr><tr><td>CSRF</td><td>켜 둔다 (쿠키 자동 전송 때문)</td><td><b>끈다</b> — 쿠키를 쓰지 않으면 공격이 성립하지 않는다</td></tr><tr><td>잘 맞는 화면</td><td>Thymeleaf (서버가 HTML 생성)</td><td>React · 모바일 앱 (JSON API)</td></tr></tbody></table></div><h3 class="part">1-3. 시작 전 준비 — 프로젝트 백업</h3><div class="warn"><span class="lbl">⚠️ 먼저 복사해 두기</span> 이 교안은 <b>boardweb</b> 서버의 시큐리티 설정을 JWT로 바꾸고, Thymeleaf 화면(5 · 6장)을 지운다. 바꾸기 전에 IntelliJ를 닫고 <code>boardweb</code> 폴더를 <b><code>boardweb-thymeleaf</code></b>로 복사해 두면 6장 결과물을 그대로 보관할 수 있다.</div></section><section class="module" id="m2"><h2><span class="num">2</span> JWT 개념 · 인증 흐름</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>JWT의 세 부분(헤더 · 페이로드 · 서명)을 설명할 수 있다.</li><li>토큰 발급부터 요청 검사까지의 흐름을 설명할 수 있다.</li></ul></div><h3 class="part">2-1. JWT의 모양</h3><div class="concept"><h3 class="blk">📖 점(.)으로 나뉜 세 부분</h3><p>JWT는 <code>xxxxx.yyyyy.zzzzz</code>처럼 점으로 나뉜 <b>문자열 하나</b>다. 각 부분은 Base64URL로 인코딩되어 있어 <code>jwt.io</code>에 붙여 넣으면 내용을 볼 수 있다.</p><table><thead><tr><th>부분</th><th>내용 (예)</th><th>설명</th></tr></thead><tbody><tr><td><b>Header</b></td><td><code>{"alg":"HS256"}</code></td><td>서명 알고리즘</td></tr><tr><td><b>Payload</b></td><td><code>{"sub":"hong","iat":1795100000,"exp":1795103600}</code></td><td><code>sub</code> = 아이디, <code>iat</code> = 발급 시각, <code>exp</code> = 만료 시각 (초)</td></tr><tr><td><b>Signature</b></td><td><code>HMACSHA256(header + "." + payload, 비밀키)</code></td><td>서버만 아는 <b>비밀키</b>로 만든 서명 — 위조 검사용</td></tr></tbody></table></div><div class="ex"><div class="lbl">💡 토큰 예 (줄바꿈은 보기 쉽게 넣은 것)</div><pre>eyJhbGciOiJIUzI1NiJ9
+.eyJzdWIiOiJob25nIiwiaWF0IjoxNzk1MTAwMDAwLCJleHAiOjE3OTUxMDM2MDB9
+.4Xb9Gk2s1mVQd8t0Yw3c7pR5nL0qZ2hE6uJ9aK1sT3Q</pre></div><div class="warn"><span class="lbl">⚠️ 토큰 내용은 누구나 읽는다</span> Payload는 <b>암호화가 아니라 인코딩</b>이다. 누구나 읽을 수 있으므로 비밀번호 같은 비밀 정보는 넣지 않는다. 대신 내용을 한 글자라도 바꾸면 <b>서명이 맞지 않아</b> 서버가 거부한다.</div><h3 class="part">2-2. 로그인부터 글쓰기까지</h3><figure style="margin:1.2rem auto;max-width:860px"><svg viewBox="0 0 860 330" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="Pretendard, 'Malgun Gothic', sans-serif">
+<defs><marker id="rb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:#52606d"/></marker></defs>
+<rect x="40" y="10" width="200" height="40" rx="8" style="fill:#eef6ff;stroke:#5b8def"/><text x="140" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2933">React (브라우저)</text>
+<rect x="620" y="10" width="200" height="40" rx="8" style="fill:#eef8e8;stroke:#6db33f"/><text x="720" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#1f2933">Spring Boot 서버</text>
+<line x1="140" y1="50" x2="140" y2="320" style="stroke:#9aa5b1;stroke-dasharray:4 4"/>
+<line x1="720" y1="50" x2="720" y2="320" style="stroke:#9aa5b1;stroke-dasharray:4 4"/>
+<line x1="140" y1="85" x2="716" y2="85" style="stroke:#52606d;stroke-width:1.6" marker-end="url(#rb)"/>
+<text x="430" y="78" text-anchor="middle" font-size="13" fill="#1f2933">① POST /api/auth/login { username, password }</text>
+<text x="770" y="110" text-anchor="start" font-size="12" fill="#52606d"></text>
+<rect x="560" y="95" width="290" height="26" rx="6" style="fill:#fff8e6;stroke:#e0b04a"/><text x="705" y="113" text-anchor="middle" font-size="12" fill="#1f2933">② 비밀번호 확인 → 토큰 발급 (서명)</text>
+<line x1="716" y1="145" x2="144" y2="145" style="stroke:#52606d;stroke-width:1.6;stroke-dasharray:6 4" marker-end="url(#rb)"/>
+<text x="430" y="138" text-anchor="middle" font-size="13" fill="#1f2933">③ { accessToken: "eyJhbGci…", username }</text>
+<rect x="10" y="155" width="260" height="26" rx="6" style="fill:#fff8e6;stroke:#e0b04a"/><text x="140" y="173" text-anchor="middle" font-size="12" fill="#1f2933">④ localStorage에 토큰 저장</text>
+<line x1="140" y1="215" x2="716" y2="215" style="stroke:#52606d;stroke-width:1.6" marker-end="url(#rb)"/>
+<text x="430" y="200" text-anchor="middle" font-size="13" fill="#1f2933">⑤ POST /api/posts</text>
+<text x="430" y="210" text-anchor="middle" font-size="11.5" fill="#52606d"></text>
+<text x="430" y="232" text-anchor="middle" font-size="12.5" fill="#c0392b">Authorization: Bearer eyJhbGci…</text>
+<rect x="560" y="240" width="290" height="26" rx="6" style="fill:#fff8e6;stroke:#e0b04a"/><text x="705" y="258" text-anchor="middle" font-size="12" fill="#1f2933">⑥ 필터가 서명 · 만료 검사 → 로그인 처리</text>
+<line x1="716" y1="292" x2="144" y2="292" style="stroke:#52606d;stroke-width:1.6;stroke-dasharray:6 4" marker-end="url(#rb)"/>
+<text x="430" y="285" text-anchor="middle" font-size="13" fill="#1f2933">⑦ 201 Created (writer = 토큰의 아이디)</text>
+</svg><figcaption class="muted" style="text-align:center">로그인하면 서버가 토큰을 발급하고, 이후 요청마다 React가 토큰을 헤더에 붙여 보낸다</figcaption></figure><table><thead><tr><th>단계</th><th>하는 곳</th><th>만들 파일</th></tr></thead><tbody><tr><td>② 토큰 발급</td><td>서버</td><td><code>TokenProvider.generateToken()</code> (4단원)</td></tr><tr><td>④ 토큰 저장 · ⑤ 헤더에 붙이기</td><td>React</td><td><code>AuthProvider</code> · axios 인터셉터 (8 · 9단원)</td></tr><tr><td>⑥ 토큰 검사 → 로그인 처리</td><td>서버</td><td><code>TokenAuthenticationFilter</code> (5단원)</td></tr><tr><td>⑦ writer = 아이디</td><td>서버</td><td>6장 <code>PostApiController</code>의 <code>Principal</code> 그대로</td></tr></tbody></table></section><section class="module" id="m3"><h2><span class="num">3</span> 서버 ① JJWT 의존성 · 토큰 설정</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>JJWT 라이브러리를 추가하고 토큰 설정값을 application.yml에 둘 수 있다.</li><li>API 서버에 필요 없는 Thymeleaf 화면 파일을 정리할 수 있다.</li></ul></div><h3 class="part">3-1. JJWT 의존성 추가</h3><div class="ex"><div class="lbl">💡 build.gradle (Gradle) — dependencies { } 안에 추가</div><pre><span class="k">implementation</span> <span class="s">'io.jsonwebtoken:jjwt-api:0.13.0'</span>
+<span class="k">runtimeOnly</span> <span class="s">'io.jsonwebtoken:jjwt-impl:0.13.0'</span>
+<span class="k">runtimeOnly</span> <span class="s">'io.jsonwebtoken:jjwt-jackson:0.13.0'</span></pre></div><div class="ex"><div class="lbl">💡 pom.xml (Maven) — &lt;dependencies&gt; 안에 추가</div><pre><span class="g">&lt;dependency</span><span class="g">&gt;</span>
+    <span class="g">&lt;groupId</span><span class="g">&gt;</span>io.jsonwebtoken<span class="g">&lt;/groupId</span><span class="g">&gt;</span>
+    <span class="g">&lt;artifactId</span><span class="g">&gt;</span>jjwt-api<span class="g">&lt;/artifactId</span><span class="g">&gt;</span>
+    <span class="g">&lt;version</span><span class="g">&gt;</span>0.13.0<span class="g">&lt;/version</span><span class="g">&gt;</span>
+<span class="g">&lt;/dependency</span><span class="g">&gt;</span>
+<span class="g">&lt;dependency</span><span class="g">&gt;</span>
+    <span class="g">&lt;groupId</span><span class="g">&gt;</span>io.jsonwebtoken<span class="g">&lt;/groupId</span><span class="g">&gt;</span>
+    <span class="g">&lt;artifactId</span><span class="g">&gt;</span>jjwt-impl<span class="g">&lt;/artifactId</span><span class="g">&gt;</span>
+    <span class="g">&lt;version</span><span class="g">&gt;</span>0.13.0<span class="g">&lt;/version</span><span class="g">&gt;</span>
+    <span class="g">&lt;scope</span><span class="g">&gt;</span>runtime<span class="g">&lt;/scope</span><span class="g">&gt;</span>
+<span class="g">&lt;/dependency</span><span class="g">&gt;</span>
+<span class="g">&lt;dependency</span><span class="g">&gt;</span>
+    <span class="g">&lt;groupId</span><span class="g">&gt;</span>io.jsonwebtoken<span class="g">&lt;/groupId</span><span class="g">&gt;</span>
+    <span class="g">&lt;artifactId</span><span class="g">&gt;</span>jjwt-jackson<span class="g">&lt;/artifactId</span><span class="g">&gt;</span>
+    <span class="g">&lt;version</span><span class="g">&gt;</span>0.13.0<span class="g">&lt;/version</span><span class="g">&gt;</span>
+    <span class="g">&lt;scope</span><span class="g">&gt;</span>runtime<span class="g">&lt;/scope</span><span class="g">&gt;</span>
+<span class="g">&lt;/dependency</span><span class="g">&gt;</span></pre></div><table><thead><tr><th>라이브러리</th><th>역할</th></tr></thead><tbody><tr><td><code>jjwt-api</code></td><td>코드에서 쓰는 클래스 (<code>Jwts</code> · <code>Keys</code> 등)</td></tr><tr><td><code>jjwt-impl</code></td><td>실제 구현 — 실행할 때만 필요 (<code>runtimeOnly</code>)</td></tr><tr><td><code>jjwt-jackson</code></td><td>토큰의 JSON 부분 변환</td></tr></tbody></table><div class="note"><span class="lbl">📌 다시 불러오기</span> 추가한 뒤 Gradle은 <b>Load Gradle Changes</b>(<code>Ctrl+Shift+O</code>), Maven은 <b>Reload All Maven Projects</b>로 내려받는다. JJWT는 스프링 부트가 버전을 관리하지 않으므로 <b>버전을 직접</b> 적는다.</div><h3 class="part">3-2. application.yml — 토큰 설정</h3><div class="ex"><div class="lbl">💡 src/main/resources/application.yml — 맨 아래에 추가</div><pre><span class="g">jwt</span>:
+  <span class="g">secret</span>:<span class="s"> boardweb-jwt-secret-key-for-study-must-be-32-bytes-or-more</span>
+  <span class="g">expiration</span>:<span class="s"> 3600000  </span> <span class="c"># 토큰 유효 시간 1시간 (밀리초)</span></pre></div><table><thead><tr><th>설정</th><th>의미</th></tr></thead><tbody><tr><td><code>jwt.secret</code></td><td>서명에 쓰는 <b>비밀키</b>. HS256은 <b>32바이트(영문 32자) 이상</b>이어야 한다 — 짧으면 서버 실행 시 <code>WeakKeyException</code></td></tr><tr><td><code>jwt.expiration</code></td><td>발급 후 몇 밀리초 동안 쓸 수 있는가. <code>3600000</code> = 60분 × 60초 × 1000</td></tr></tbody></table><div class="warn"><span class="lbl">⚠️ 비밀키 관리</span> 실제 서비스에서는 비밀키를 코드 저장소(GitHub)에 올리지 않는다. 환경 변수로 넣고 <code>secret: ${JWT_SECRET}</code>처럼 읽는다. 비밀키가 새면 누구나 토큰을 위조할 수 있다.</div><h3 class="part">3-3. Thymeleaf 화면 파일 정리</h3><div class="concept"><h3 class="blk">📖 API 서버에 남길 것 · 지울 것</h3><table><thead><tr><th>구분</th><th>파일</th><th>처리</th></tr></thead><tbody><tr><td>화면 컨트롤러</td><td><code>HomeController</code> · <code>PostViewController</code> · <code>UserController</code> · <code>LoginUserAdvice</code></td><td><b>삭제</b> — React가 화면을 맡는다</td></tr><tr><td>템플릿 · 정적 파일</td><td><code>templates/post/*</code> · <code>templates/user/*</code> · <code>static/js/post.js</code></td><td><b>삭제</b></td></tr><tr><td>그대로 사용</td><td><code>Post</code> · <code>User</code> · 리포지터리 · DTO · <code>PostService</code> · <code>UserService</code> · <code>UserDetailService</code> · <code>PostApiController</code></td><td>4~6장 코드 재사용</td></tr><tr><td>새로 만들기</td><td><code>TokenProvider</code> · <code>TokenAuthenticationFilter</code> · <code>AuthApiController</code> · <code>ApiExceptionHandler</code> · 로그인 DTO</td><td>4~6단원</td></tr><tr><td>다시 쓰기</td><td><code>SecurityConfig</code></td><td>5단원 — JWT · CORS 설정</td></tr></tbody></table></div><div class="note"><span class="lbl">📌 의존성은 그대로</span> Thymeleaf 의존성(<code>spring-boot-starter-thymeleaf</code>)은 남겨 두어도 동작에 영향이 없다.</div></section><section class="module" id="m4"><h2><span class="num">4</span> 서버 ② TokenProvider — 토큰 발급 · 검사</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>비밀키로 서명한 JWT를 발급하고, 토큰에서 아이디를 꺼낼 수 있다.</li><li>위조 · 만료된 토큰을 가려낼 수 있다.</li></ul></div><div class="ex"><div class="lbl">💡 config/jwt/TokenProvider.java</div><pre><span class="a">@Component</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">TokenProvider</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">SecretKey</span> key;        <span class="c">// 서명용 비밀키</span>
+    <span class="k">private</span> <span class="k">final</span> <span class="k">long</span> expiration;      <span class="c">// 유효 시간 (밀리초)</span>
+
+    <span class="c">// application.yml의 jwt.secret · jwt.expiration 읽기</span>
+    <span class="k">public</span> <span class="t">TokenProvider</span>(<span class="a">@Value</span>(<span class="s">"${jwt.secret}"</span>) <span class="t">String</span> secret,
+                         <span class="a">@Value</span>(<span class="s">"${jwt.expiration}"</span>) <span class="k">long</span> expiration) {
+        <span class="k">this</span>.key = <span class="t">Keys</span>.<span class="f">hmacShaKeyFor</span>(secret.<span class="f">getBytes</span>(<span class="t">StandardCharsets</span>.<span class="t">UTF_8</span>));
+        <span class="k">this</span>.expiration = expiration;
+    }
+
+    <span class="c">// ① 토큰 발급 — 아이디를 담고 비밀키로 서명</span>
+    <span class="k">public</span> <span class="t">String</span> <span class="f">generateToken</span>(<span class="t">String</span> username) {
+        <span class="t">Date</span> now = <span class="k">new</span> <span class="t">Date</span>();
+        <span class="k">return</span> <span class="t">Jwts</span>.<span class="f">builder</span>()
+                .<span class="f">subject</span>(username)                                  <span class="c">// sub : 아이디</span>
+                .<span class="f">issuedAt</span>(now)                                      <span class="c">// iat : 발급 시각</span>
+                .<span class="f">expiration</span>(<span class="k">new</span> <span class="t">Date</span>(now.<span class="f">getTime</span>() + expiration))   <span class="c">// exp : 만료 시각</span>
+                .<span class="f">signWith</span>(key)                                      <span class="c">// 서명 (HS256)</span>
+                .<span class="f">compact</span>();                                         <span class="c">// 문자열로</span>
+    }
+
+    <span class="c">// ② 토큰에서 아이디 꺼내기 — 서명 · 만료 검사를 함께 한다</span>
+    <span class="k">public</span> <span class="t">String</span> <span class="f">getUsername</span>(<span class="t">String</span> token) {
+        <span class="k">return</span> <span class="t">Jwts</span>.<span class="f">parser</span>()
+                .<span class="f">verifyWith</span>(key)               <span class="c">// 같은 비밀키로 서명 확인</span>
+                .<span class="f">build</span>()
+                .<span class="f">parseSignedClaims</span>(token)      <span class="c">// 위조 · 만료면 예외</span>
+                .<span class="f">getPayload</span>()
+                .<span class="f">getSubject</span>();
+    }
+
+    <span class="c">// ③ 쓸 수 있는 토큰인가?</span>
+    <span class="k">public</span> <span class="k">boolean</span> <span class="f">validToken</span>(<span class="t">String</span> token) {
+        <span class="k">try</span> {
+            <span class="f">getUsername</span>(token);
+            <span class="k">return</span> <span class="k">true</span>;
+        } <span class="k">catch</span> (<span class="t">JwtException</span> | <span class="t">IllegalArgumentException</span> e) {
+            <span class="k">return</span> <span class="k">false</span>;   <span class="c">// 서명 불일치 · 만료 · 형식 오류</span>
+        }
+    }
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>@Value("${jwt.secret}")</code></td><td>application.yml 값을 생성자 매개변수로 받는다</td></tr><tr><td><code>Keys.hmacShaKeyFor(…)</code></td><td>문자열 비밀키 → HMAC-SHA 서명용 키 객체 (32바이트 미만이면 <code>WeakKeyException</code>)</td></tr><tr><td><code>Jwts.builder() … .compact()</code></td><td>토큰 만들기 → <code>eyJ…</code> 문자열</td></tr><tr><td><code>signWith(key)</code></td><td>키 길이에 맞는 알고리즘(32바이트 → HS256)을 자동으로 고른다</td></tr><tr><td><code>Jwts.parser().verifyWith(key)</code></td><td>받은 토큰을 같은 키로 검사</td></tr><tr><td><code>parseSignedClaims(token)</code></td><td>서명이 틀리면 <code>SignatureException</code>, 만료면 <code>ExpiredJwtException</code> — 둘 다 <code>JwtException</code></td></tr></tbody></table><div class="warn"><span class="lbl">⚠️ import 주의</span> <code>SecretKey</code>는 <code>javax.crypto.SecretKey</code>, <code>Date</code>는 <code>java.util.Date</code>, <code>Value</code>는 <code>org.springframework.beans.factory.annotation.Value</code>를 import 한다. 롬복의 <code>@Value</code>를 고르면 설정값을 읽지 못한다.</div></section><section class="module" id="m5"><h2><span class="num">5</span> 서버 ③ TokenAuthenticationFilter · SecurityConfig</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>요청 헤더의 토큰을 검사해 로그인 상태로 만드는 필터를 작성할 수 있다.</li><li>SecurityConfig를 JWT · CORS · STATELESS 설정으로 바꿀 수 있다.</li></ul></div><h3 class="part">5-1. TokenAuthenticationFilter — 요청마다 토큰 검사</h3><div class="ex"><div class="lbl">💡 config/jwt/TokenAuthenticationFilter.java</div><pre><span class="a">@RequiredArgsConstructor</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">TokenAuthenticationFilter</span> <span class="k">extends</span> <span class="t">OncePerRequestFilter</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">TokenProvider</span> tokenProvider;
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserDetailService</span> userDetailService;
+
+    <span class="a">@Override</span>
+    <span class="k">protected</span> <span class="k">void</span> <span class="f">doFilterInternal</span>(<span class="t">HttpServletRequest</span> request,
+                                    <span class="t">HttpServletResponse</span> response,
+                                    <span class="t">FilterChain</span> filterChain) <span class="k">throws</span> <span class="t">ServletException</span>, <span class="t">IOException</span> {
+        <span class="c">// ① Authorization: Bearer eyJhbGci…</span>
+        <span class="t">String</span> header = request.<span class="f">getHeader</span>(<span class="s">"Authorization"</span>);
+
+        <span class="k">if</span> (header != <span class="k">null</span> &amp;&amp; header.<span class="f">startsWith</span>(<span class="s">"Bearer "</span>)) {
+            <span class="t">String</span> token = header.<span class="f">substring</span>(<span class="n">7</span>);              <span class="c">// "Bearer " 뒤의 토큰만</span>
+
+            <span class="c">// ② 쓸 수 있는 토큰이면 → 이번 요청을 로그인 상태로</span>
+            <span class="k">if</span> (tokenProvider.<span class="f">validToken</span>(token)) {
+                <span class="t">String</span> username = tokenProvider.<span class="f">getUsername</span>(token);
+                <span class="t">UserDetails</span> user = userDetailService.<span class="f">loadUserByUsername</span>(username);
+                <span class="t">Authentication</span> authentication =
+                        <span class="k">new</span> <span class="t">UsernamePasswordAuthenticationToken</span>(user, <span class="k">null</span>, user.<span class="f">getAuthorities</span>());
+                <span class="t">SecurityContextHolder</span>.<span class="f">getContext</span>().<span class="f">setAuthentication</span>(authentication);
+            }
+        }
+        <span class="c">// ③ 다음 필터로 (토큰이 없어도 진행 — 권한 검사는 SecurityConfig 규칙이 한다)</span>
+        filterChain.<span class="f">doFilter</span>(request, response);
+    }
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>OncePerRequestFilter</code></td><td>요청 한 번에 <b>딱 한 번</b> 실행되는 필터</td></tr><tr><td><code>header.substring(7)</code></td><td><code>"Bearer "</code>(7글자)를 잘라 토큰만 꺼낸다</td></tr><tr><td><code>loadUserByUsername(username)</code></td><td>6장 <code>UserDetailService</code> 재사용 — 아이디로 회원 조회</td></tr><tr><td><code>UsernamePasswordAuthenticationToken(user, null, 권한)</code></td><td>“로그인한 사용자” 정보 객체. 비밀번호는 이미 확인했으므로 <code>null</code></td></tr><tr><td><code>SecurityContextHolder…setAuthentication()</code></td><td>이번 요청 동안 로그인 상태로 등록 → 컨트롤러의 <code>Principal</code>에 아이디가 들어간다</td></tr></tbody></table><div class="note"><span class="lbl">📌 @Component 없음</span> 이 필터에는 <code>@Component</code>를 붙이지 않는다. 붙이면 스프링 부트가 일반 서블릿 필터로도 한 번 더 등록한다. 5-2의 <code>SecurityConfig</code>에서 <code>new</code>로 만들어 시큐리티 필터 체인에만 넣는다.</div><h3 class="part">5-2. SecurityConfig — JWT 방식으로 다시 쓰기</h3><div class="ex"><div class="lbl">💡 config/SecurityConfig.java</div><pre><span class="a">@RequiredArgsConstructor</span>
+<span class="a">@Configuration</span>
+<span class="a">@EnableWebSecurity</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">SecurityConfig</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">TokenProvider</span> tokenProvider;
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserDetailService</span> userDetailService;
+
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">SecurityFilterChain</span> <span class="f">filterChain</span>(<span class="t">HttpSecurity</span> http){
+        http
+            .<span class="f">csrf</span>(<span class="t">AbstractHttpConfigurer</span>::disable)          <span class="c">// 쿠키를 안 쓰므로 CSRF 끔</span>
+            .<span class="f">formLogin</span>(<span class="t">AbstractHttpConfigurer</span>::disable)     <span class="c">// 로그인 화면 없음 (API로 로그인)</span>
+            .<span class="f">httpBasic</span>(<span class="t">AbstractHttpConfigurer</span>::disable)
+            .<span class="f">sessionManagement</span>(session -&gt; session
+                .<span class="f">sessionCreationPolicy</span>(<span class="t">SessionCreationPolicy</span>.<span class="t">STATELESS</span>))   <span class="c">// 세션 안 만듦</span>
+            .<span class="f">cors</span>(<span class="t">Customizer</span>.<span class="f">withDefaults</span>())                <span class="c">// 아래 CORS 설정 사용</span>
+            .<span class="f">authorizeHttpRequests</span>(auth -&gt; auth
+                .<span class="f">requestMatchers</span>(<span class="s">"/api/auth/**"</span>, <span class="s">"/error"</span>).<span class="f">permitAll</span>()
+                .<span class="f">requestMatchers</span>(<span class="t">HttpMethod</span>.<span class="t">GET</span>, <span class="s">"/api/posts/**"</span>).<span class="f">permitAll</span>()
+                .<span class="f">anyRequest</span>().<span class="f">authenticated</span>()  <span class="c">//나머지는 로그인 필요</span>
+            )
+            .<span class="f">exceptionHandling</span>(e -&gt; e                       <span class="c">// 로그인 안 했으면 401</span>
+                .<span class="f">authenticationEntryPoint</span>(<span class="k">new</span> <span class="t">HttpStatusEntryPoint</span>(<span class="t">HttpStatus</span>.<span class="t">UNAUTHORIZED</span>)))
+            .<span class="f">addFilterBefore</span>(<span class="k">new</span> <span class="t">TokenAuthenticationFilter</span>(tokenProvider, userDetailService),
+                             <span class="t">UsernamePasswordAuthenticationFilter</span>.<span class="k">class</span>);
+        <span class="k">return</span> http.<span class="f">build</span>();
+    }
+
+    <span class="c">// React 개발 서버(5173)에서 오는 요청 허용</span>
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">CorsConfigurationSource</span> <span class="f">corsConfigurationSource</span>() {
+        <span class="t">CorsConfiguration</span> config = <span class="k">new</span> <span class="t">CorsConfiguration</span>();
+        config.<span class="f">setAllowedOrigins</span>(<span class="t">List</span>.<span class="f">of</span>(<span class="s">"http://localhost:5173"</span>));
+        config.<span class="f">setAllowedMethods</span>(<span class="t">List</span>.<span class="f">of</span>(<span class="s">"GET"</span>, <span class="s">"POST"</span>, <span class="s">"PUT"</span>, <span class="s">"DELETE"</span>, <span class="s">"OPTIONS"</span>));
+        config.<span class="f">setAllowedHeaders</span>(<span class="t">List</span>.<span class="f">of</span>(<span class="s">"*"</span>));          <span class="c">// Authorization 헤더 포함</span>
+
+        <span class="t">UrlBasedCorsConfigurationSource</span> source = <span class="k">new</span> <span class="t">UrlBasedCorsConfigurationSource</span>();
+        source.<span class="f">registerCorsConfiguration</span>(<span class="s">"/api/**"</span>, config);
+        <span class="k">return</span> source;
+    }
+
+    <span class="c">// 비밀번호 암호화 도구(UserService에서 주입받아 사용)</span>
+    <span class="a">@Bean</span>
+    <span class="k">public</span> <span class="t">PasswordEncoder</span> <span class="f">passwordEncoder</span>(){
+        <span class="k">return</span> <span class="k">new</span> <span class="t">BCryptPasswordEncoder</span>();
+    }
+}</pre></div><table><thead><tr><th>설정</th><th>6장 (세션)</th><th>이 교안 (JWT)</th></tr></thead><tbody><tr><td><code>csrf</code></td><td>켬</td><td><code>disable</code> — 토큰을 헤더로 직접 보내므로 CSRF 공격이 성립하지 않는다</td></tr><tr><td><code>formLogin</code></td><td><code>/login</code> 화면</td><td><code>disable</code> — 6단원 <code>POST /api/auth/login</code>이 맡는다</td></tr><tr><td><code>sessionManagement</code></td><td>세션 사용</td><td><code>STATELESS</code> — 서버가 로그인 상태를 저장하지 않고 요청마다 토큰으로 판단</td></tr><tr><td>로그인 안 한 요청</td><td>로그인 화면으로 이동 (302)</td><td><code>HttpStatusEntryPoint</code> → <b>401</b> (React가 받아서 처리)</td></tr><tr><td><code>addFilterBefore(…)</code></td><td>—</td><td>시큐리티 기본 로그인 필터 <b>앞에</b> 토큰 필터를 넣는다</td></tr><tr><td><code>cors</code></td><td>—</td><td>다른 주소(5173)의 React가 API를 부를 수 있게 허용</td></tr></tbody></table><div class="concept"><h3 class="blk">📖 CORS란?</h3><p>브라우저는 화면을 받은 주소(<code>localhost:5173</code>)와 <b>다른 주소</b>(<code>localhost:8080</code>)로 보내는 요청을 기본으로 막는다(<b>동일 출처 정책</b>). 서버가 “5173에서 오는 요청은 허용한다”고 응답 헤더로 알려 줘야 React가 응답을 읽을 수 있다. 포트만 달라도 다른 출처다.</p><p>헤더에 <code>Authorization</code>을 붙이면 브라우저는 본 요청 전에 <code>OPTIONS</code> 요청(<b>preflight</b>)으로 먼저 허락을 묻는다. 그래서 허용 메서드에 <code>OPTIONS</code>를 넣는다.</p></div><div class="warn"><span class="lbl">⚠️ CORS는 시큐리티에서</span> 예전 방식인 <code>WebMvcConfigurer.addCorsMappings()</code>만 쓰면 preflight 요청이 시큐리티 필터에서 먼저 막혀 401이 날 수 있다. 시큐리티를 쓸 때는 <code>.cors(Customizer.withDefaults())</code> + <code>CorsConfigurationSource</code> 빈으로 설정한다.</div></section><section class="module" id="m6"><h2><span class="num">6</span> 서버 ④ 로그인 API · 오류 응답 · Postman</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>로그인 API에서 비밀번호를 확인하고 토큰을 발급할 수 있다.</li><li>예외를 JSON 오류 응답(400 · 401 · 403)으로 바꿀 수 있다.</li><li>Postman으로 토큰을 받아 글을 등록할 수 있다.</li></ul></div><h3 class="part">6-1. 로그인 요청 · 응답 DTO</h3><div class="ex"><div class="lbl">💡 dto/LoginRequest.java</div><pre><span class="a">@NoArgsConstructor</span>
+<span class="a">@Getter</span>
+<span class="a">@Setter</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">LoginRequest</span> {
+    <span class="k">private</span> <span class="t">String</span> username;
+    <span class="k">private</span> <span class="t">String</span> password;
+}</pre></div><div class="ex"><div class="lbl">💡 dto/LoginResponse.java</div><pre><span class="a">@AllArgsConstructor</span>
+<span class="a">@Getter</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">LoginResponse</span> {
+    <span class="k">private</span> <span class="t">String</span> accessToken;   <span class="c">// 발급한 JWT</span>
+    <span class="k">private</span> <span class="t">String</span> username;      <span class="c">// 화면에 표시할 아이디</span>
+}</pre></div><h3 class="part">6-2. UserService — login() 추가</h3><div class="ex"><div class="lbl">💡 service/UserService.java — 필드 · 메서드 추가</div><pre>    <span class="k">private</span> <span class="k">final</span> <span class="t">TokenProvider</span> tokenProvider;   <span class="c">// 필드 추가</span>
+
+    <span class="c">// 로그인 — 비밀번호 확인 후 토큰 발급</span>
+    <span class="k">public</span> <span class="t">LoginResponse</span> <span class="f">login</span>(<span class="t">LoginRequest</span> request) {
+        <span class="t">User</span> user = userRepository.<span class="f">findByUsername</span>(request.<span class="f">getUsername</span>())
+                .<span class="f">orElseThrow</span>(() -&gt; <span class="k">new</span> <span class="t">BadCredentialsException</span>(<span class="s">"아이디 또는 비밀번호가 올바르지 않습니다."</span>));
+
+        <span class="k">if</span> (!passwordEncoder.<span class="f">matches</span>(request.<span class="f">getPassword</span>(), user.<span class="f">getPassword</span>())) {
+            <span class="k">throw</span> <span class="k">new</span> <span class="t">BadCredentialsException</span>(<span class="s">"아이디 또는 비밀번호가 올바르지 않습니다."</span>);
+        }
+        <span class="t">String</span> token = tokenProvider.<span class="f">generateToken</span>(user.<span class="f">getUsername</span>());
+        <span class="k">return</span> <span class="k">new</span> <span class="t">LoginResponse</span>(token, user.<span class="f">getUsername</span>());
+    }</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>passwordEncoder.matches(입력값, DB값)</code></td><td>입력한 비밀번호를 BCrypt로 바꿔 DB의 값과 비교 (6장에서는 시큐리티가 대신 하던 일)</td></tr><tr><td><code>BadCredentialsException</code></td><td>스프링 시큐리티의 “로그인 실패” 예외 — 6-4에서 401로 바꾼다</td></tr><tr><td>같은 문구 두 번</td><td>아이디가 없는지 비밀번호가 틀렸는지 알려 주지 않는다 → 아이디 존재 여부를 알아내는 공격 방지</td></tr></tbody></table><h3 class="part">6-3. AuthApiController — 회원가입 · 로그인 API</h3><div class="ex"><div class="lbl">💡 controller/AuthApiController.java</div><pre><span class="a">@RequiredArgsConstructor</span>
+<span class="a">@RequestMapping</span>(<span class="s">"/api/auth"</span>)
+<span class="a">@RestController</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">AuthApiController</span> {
+    <span class="k">private</span> <span class="k">final</span> <span class="t">UserService</span> userService;
+
+    <span class="c">// 회원가입 → POST /api/auth/signup</span>
+    <span class="a">@PostMapping</span>(<span class="s">"/signup"</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Void</span>&gt; <span class="f">signup</span>(<span class="a">@RequestBody</span> <span class="t">AddUserRequest</span> request) {
+        userService.<span class="f">save</span>(request);                         <span class="c">// 6장 회원가입 재사용</span>
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">status</span>(<span class="t">HttpStatus</span>.<span class="t">CREATED</span>).<span class="f">build</span>();
+    }
+
+    <span class="c">// 로그인 → POST /api/auth/login → 토큰 발급</span>
+    <span class="a">@PostMapping</span>(<span class="s">"/login"</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">LoginResponse</span>&gt; <span class="f">login</span>(<span class="a">@RequestBody</span> <span class="t">LoginRequest</span> request) {
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">ok</span>().<span class="f">body</span>(userService.<span class="f">login</span>(request));
+    }
+}</pre></div><h3 class="part">6-4. ApiExceptionHandler — 오류를 JSON으로</h3><div class="ex"><div class="lbl">💡 controller/ApiExceptionHandler.java</div><pre><span class="a">@RestControllerAdvice</span>   <span class="c">// 모든 REST 컨트롤러의 예외를 여기서 처리</span>
+<span class="k">public</span> <span class="k">class</span> <span class="t">ApiExceptionHandler</span> {
+
+    <span class="c">// 잘못된 요청 (없는 글 · 아이디 중복 · 빈 값) → 400</span>
+    <span class="a">@ExceptionHandler</span>(<span class="t">IllegalArgumentException</span>.<span class="k">class</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;&gt; <span class="f">handleBadRequest</span>(<span class="t">IllegalArgumentException</span> e) {
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">badRequest</span>().<span class="f">body</span>(<span class="t">Map</span>.<span class="f">of</span>(<span class="s">"message"</span>, e.<span class="f">getMessage</span>()));
+    }
+
+    <span class="c">// 로그인 실패 → 401</span>
+    <span class="a">@ExceptionHandler</span>(<span class="t">BadCredentialsException</span>.<span class="k">class</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;&gt; <span class="f">handleLoginFail</span>(<span class="t">BadCredentialsException</span> e) {
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">status</span>(<span class="t">HttpStatus</span>.<span class="t">UNAUTHORIZED</span>).<span class="f">body</span>(<span class="t">Map</span>.<span class="f">of</span>(<span class="s">"message"</span>, e.<span class="f">getMessage</span>()));
+    }
+
+    <span class="c">// 본인 글이 아님 (6장 PostService.checkWriter) → 403</span>
+    <span class="a">@ExceptionHandler</span>(<span class="t">AccessDeniedException</span>.<span class="k">class</span>)
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">Map</span>&lt;<span class="t">String</span>, <span class="t">String</span>&gt;&gt; <span class="f">handleForbidden</span>(<span class="t">AccessDeniedException</span> e) {
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">status</span>(<span class="t">HttpStatus</span>.<span class="t">FORBIDDEN</span>).<span class="f">body</span>(<span class="t">Map</span>.<span class="f">of</span>(<span class="s">"message"</span>, e.<span class="f">getMessage</span>()));
+    }
+}</pre></div><table><thead><tr><th>예외</th><th>던지는 곳</th><th>응답</th></tr></thead><tbody><tr><td><code>IllegalArgumentException</code></td><td><code>PostService.findById()</code> · <code>UserService.save()</code></td><td><code>400</code> <code>{"message": "이미 사용 중인 아이디입니다."}</code></td></tr><tr><td><code>BadCredentialsException</code></td><td><code>UserService.login()</code></td><td><code>401</code> <code>{"message": "아이디 또는 비밀번호가 …"}</code></td></tr><tr><td><code>AccessDeniedException</code></td><td><code>PostService.checkWriter()</code></td><td><code>403</code> <code>{"message": "본인이 쓴 글만 …"}</code></td></tr></tbody></table><div class="note"><span class="lbl">💡 오류 문구는 서버가</span> React는 오류 응답의 <code>message</code>를 꺼내 그대로 알림창에 보여 준다(8단원 <code>getErrorMessage()</code>). 화면마다 오류 문구를 따로 만들지 않아도 된다.</div><h3 class="part">6-5. PostApiController — 목록에 검색 파라미터 추가</h3><div class="ex"><div class="lbl">💡 controller/PostApiController.java — findAllPosts() 수정</div><pre>    <span class="c">// 글 목록 · 검색 → GET /api/posts, GET /api/posts?type=title&amp;keyword=가입</span>
+    <span class="a">@GetMapping</span>
+    <span class="k">public</span> <span class="t">ResponseEntity</span>&lt;<span class="t">List</span>&lt;<span class="t">PostResponse</span>&gt;&gt; <span class="f">findAllPosts</span>(<span class="a">@RequestParam</span>(required = <span class="k">false</span>) <span class="t">String</span> type,
+                                                           <span class="a">@RequestParam</span>(required = <span class="k">false</span>) <span class="t">String</span> keyword) {
+        <span class="t">List</span>&lt;<span class="t">PostResponse</span>&gt; posts = postService.<span class="f">search</span>(type, keyword)   <span class="c">// 5장 search() 재사용</span>
+                .<span class="f">stream</span>()
+                .<span class="f">map</span>(<span class="t">PostResponse</span>::<span class="k">new</span>)
+                .<span class="f">toList</span>();
+        <span class="k">return</span> <span class="t">ResponseEntity</span>.<span class="f">ok</span>().<span class="f">body</span>(posts);
+    }</pre></div><div class="note"><span class="lbl">📌 Principal은 그대로</span> 등록 · 수정 · 삭제 메서드는 6장 그대로다. <code>Principal principal</code>에는 이제 세션이 아니라 <b>토큰 필터</b>(5-1)가 넣어 준 사용자가 들어온다. 컨트롤러 입장에서는 달라진 것이 없다.</div><h3 class="part">6-6. Postman으로 확인</h3><table><thead><tr><th>순서</th><th>요청</th><th>본문 · 헤더</th><th>결과</th></tr></thead><tbody><tr><td>1</td><td><code>POST /api/auth/signup</code></td><td>Body raw JSON <code>{"username":"hong","password":"1234"}</code></td><td><code>201 Created</code></td></tr><tr><td>2</td><td><code>POST /api/auth/login</code></td><td>같은 JSON</td><td><code>200</code> <code>{"accessToken":"eyJ…","username":"hong"}</code></td></tr><tr><td>3</td><td><code>POST /api/posts</code> (토큰 없이)</td><td><code>{"title":"가입인사","content":"반갑습니다"}</code></td><td><code>401 Unauthorized</code></td></tr><tr><td>4</td><td><code>POST /api/posts</code></td><td><b>Authorization</b> 탭 → Type <b>Bearer Token</b> → 2번의 토큰 붙여 넣기</td><td><code>201</code> · <code>"writer":"hong"</code></td></tr><tr><td>5</td><td><code>GET /api/posts?type=title&amp;keyword=가입</code></td><td>토큰 없이</td><td><code>200</code> · 검색 결과</td></tr><tr><td>6</td><td><code>POST /api/auth/login</code></td><td>비밀번호 틀리게</td><td><code>401</code> <code>{"message":"아이디 또는 비밀번호가 …"}</code></td></tr></tbody></table><div class="note"><span class="lbl">💡 토큰 들여다보기</span> 2번에서 받은 토큰을 <code>https://jwt.io</code>에 붙여 넣으면 Payload에 <code>"sub": "hong"</code>과 발급 · 만료 시각이 보인다. 토큰 한 글자를 바꿔 4번을 다시 보내면 <b>401</b>이 난다(서명 불일치).</div></section><section class="module" id="m7"><h2><span class="num">7</span> React ① 프로젝트 만들기 · 폴더 구조</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>Vite로 React + TypeScript 프로젝트를 만들고 필요한 라이브러리를 설치할 수 있다.</li><li>Bootstrap CSS를 연결하고 폴더 구조를 잡을 수 있다.</li></ul></div><h3 class="part">7-1. 프로젝트 만들기</h3><table><thead><tr><th>순서</th><th>작업</th></tr></thead><tbody><tr><td>1</td><td><code>https://nodejs.org</code> → <b>LTS</b> 버전 설치 → 명령 프롬프트에서 <code>node -v</code> · <code>npm -v</code> 확인</td></tr><tr><td>2</td><td>편집기는 <b>VS Code</b> 권장</td></tr><tr><td>3</td><td>boardweb 폴더가 있는 작업 폴더에서 아래 명령 실행</td></tr></tbody></table><div class="ex"><div class="lbl">💡 명령 프롬프트 — 작업 폴더에서</div><pre># ① Vite로 React + TypeScript 프로젝트 만들기
+npm create vite@latest boardweb-client -- --template react-ts
+
+# ② 폴더로 이동 후 기본 패키지 설치
+cd boardweb-client
+npm install
+
+# ③ 게시판에 필요한 라이브러리 추가
+npm install axios react-router-dom dayjs bootstrap
+
+# ④ 개발 서버 실행 → http://localhost:5173
+npm run dev</pre></div><table><thead><tr><th>라이브러리</th><th>용도</th></tr></thead><tbody><tr><td><code>axios</code></td><td>서버에 HTTP 요청, JSON 자동 변환, <b>인터셉터</b>로 모든 요청에 토큰 붙이기</td></tr><tr><td><code>react-router-dom</code></td><td>주소(URL)에 따라 다른 화면(컴포넌트) 보여 주기</td></tr><tr><td><code>dayjs</code></td><td>날짜 형식 바꾸기 — <code>"2026-11-20T10:15:30"</code> → <code>2026-11-20 10:15</code></td></tr><tr><td><code>bootstrap</code></td><td>5장과 같은 Bootstrap 클래스로 화면 꾸미기 (CDN 대신 npm으로 설치)</td></tr></tbody></table><h3 class="part">7-2. 기본 파일 정리 · main.tsx</h3><table><thead><tr><th>파일</th><th>처리</th></tr></thead><tbody><tr><td><code>src/App.css</code> · <code>src/index.css</code> · <code>src/assets/</code></td><td><b>삭제</b> — Bootstrap을 쓴다</td></tr><tr><td><code>src/App.tsx</code></td><td>9단원에서 새로 작성</td></tr><tr><td><code>src/main.tsx</code></td><td>아래처럼 수정</td></tr></tbody></table><div class="ex"><div class="lbl">💡 src/main.tsx</div><pre><span class="k">import</span> { <span class="t">StrictMode</span> } from 'react';
+<span class="k">import</span> { createRoot } from 'react-dom/client';
+<span class="k">import</span> 'bootstrap/dist/css/bootstrap.min.css';   <span class="c">// Bootstrap CSS</span>
+<span class="k">import</span> <span class="t">App</span> from './<span class="t">App</span>';
+
+<span class="f">createRoot</span>(document.<span class="f">getElementById</span>('root')!).<span class="f">render</span>(
+  &lt;<span class="t">StrictMode</span>&gt;
+    &lt;<span class="t">App</span> /&gt;
+  &lt;/<span class="t">StrictMode</span>&gt;,
+);</pre></div><div class="note"><span class="lbl">📌 ! (non-null 단언)</span> <code>document.getElementById('root')!</code>의 <code>!</code>는 “null이 아니다”라고 TypeScript에 알려 주는 표시다. <code>index.html</code>에 <code>&lt;div id="root"&gt;</code>가 있으므로 안전하다.</div><h3 class="part">7-3. 폴더 구조</h3><div class="ex"><div class="lbl">💡 boardweb-client/src</div><pre>src/
+├─ main.tsx                   ← 시작 파일 (Bootstrap 연결)
+├─ App.tsx                    ← 라우팅 (9단원)
+├─ types/
+│  ├─ post.ts                 ← 게시글 타입
+│  └─ auth.ts                 ← 로그인 타입
+├─ api/
+│  ├─ api.ts                  ← axios 인스턴스 · 토큰 인터셉터
+│  ├─ auth.ts                 ← 회원가입 · 로그인 API
+│  └─ posts.ts                ← 게시글 API
+├─ context/
+│  ├─ AuthContext.ts          ← 로그인 상태 통로 · useAuth()
+│  └─ AuthProvider.tsx        ← 로그인 · 로그아웃 처리
+├─ components/
+│  ├─ Header.tsx              ← 위쪽 로그인 상태 · 제목
+│  └─ PrivateRoute.tsx        ← 로그인한 사람만 들어가는 화면
+└─ pages/
+   ├─ Home.tsx · PostList.tsx · PostDetail.tsx · PostWrite.tsx
+   └─ Login.tsx · Signup.tsx</pre></div><div class="warn"><span class="lbl">⚠️ 타입은 import type</span> Vite 템플릿의 <code>tsconfig</code>는 <code>verbatimModuleSyntax</code>가 켜져 있다. <b>타입만</b> 가져올 때는 <code>import type { Post } from '../types/post';</code>처럼 <code>type</code>을 붙여야 한다. 빠지면 <code>'Post' is a type and must be imported using a type-only import</code> 오류가 난다.</div></section><section class="module" id="m8"><h2><span class="num">8</span> React ② 타입 · axios 인터셉터 · API 함수</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>TypeScript interface로 서버 DTO와 같은 모양의 타입을 만들 수 있다.</li><li>axios 인터셉터로 모든 요청에 토큰을 붙이고, 401 응답을 한곳에서 처리할 수 있다.</li></ul></div><h3 class="part">8-1. 타입 — types/post.ts · types/auth.ts</h3><div class="ex"><div class="lbl">💡 src/types/post.ts</div><pre><span class="c">// 서버 PostResponse와 같은 모양</span>
+export <span class="k">interface</span> <span class="t">Post</span> {
+  id: number;
+  title: string;
+  content: string;
+  writer: string;
+  createdAt: string;   <span class="c">// LocalDateTime → "2026-11-20T10:15:30.123" 문자열</span>
+  updatedAt: string;
+}
+
+<span class="c">// 글쓰기 · 수정 폼 — writer는 서버가 로그인 아이디로 넣는다</span>
+export <span class="k">interface</span> <span class="t">PostForm</span> {
+  title: string;
+  content: string;
+}
+
+<span class="c">// 검색 유형 — 이 세 값만 허용</span>
+export type <span class="t">SearchType</span> = 'title' | 'content' | 'writer';</pre></div><div class="ex"><div class="lbl">💡 src/types/auth.ts</div><pre><span class="c">// 회원가입 · 로그인 폼 (서버 AddUserRequest · LoginRequest)</span>
+export <span class="k">interface</span> <span class="t">AuthForm</span> {
+  username: string;
+  password: string;
+}
+
+<span class="c">// 로그인 응답 (서버 LoginResponse)</span>
+export <span class="k">interface</span> <span class="t">LoginResponse</span> {
+  accessToken: string;
+  username: string;
+}</pre></div><table><thead><tr><th>타입</th><th>서버 클래스</th><th>비고</th></tr></thead><tbody><tr><td><code>Post</code></td><td><code>PostResponse</code></td><td>필드 이름이 같아야 값이 들어온다</td></tr><tr><td><code>PostForm</code></td><td><code>AddPostRequest</code> · <code>UpdatePostRequest</code></td><td>writer 없음 (6장)</td></tr><tr><td><code>AuthForm</code></td><td><code>AddUserRequest</code> · <code>LoginRequest</code></td><td>필드가 같아 하나로 사용</td></tr><tr><td><code>LoginResponse</code></td><td><code>LoginResponse</code></td><td>토큰 · 아이디</td></tr><tr><td><code>SearchType</code></td><td><code>PostService.search()</code>의 type</td><td><code>'title' | 'content' | 'writer'</code> — 다른 문자열은 컴파일 오류</td></tr></tbody></table><h3 class="part">8-2. axios 인스턴스 — api/api.ts</h3><div class="ex"><div class="lbl">💡 src/api/api.ts</div><pre><span class="k">import</span> axios from 'axios';
+
+const api = axios.<span class="f">create</span>({
+  baseURL: 'http:<span class="c">//localhost:8080/api',</span>
+});
+
+<span class="c">// ① 요청 인터셉터 — 저장된 토큰을 Authorization 헤더에 붙인다</span>
+api.interceptors.request.<span class="f">use</span>((config) =&gt; {
+  const token = localStorage.<span class="f">getItem</span>('accessToken');
+  <span class="k">if</span> (token) {
+    config.headers.<span class="t">Authorization</span> = `<span class="t">Bearer</span> ${token}`;
+  }
+  <span class="k">return</span> config;
+});
+
+<span class="c">// ② 응답 인터셉터 — 토큰이 만료 · 위조되어 401이면 로그아웃 처리</span>
+api.interceptors.response.<span class="f">use</span>(
+  (response) =&gt; response,
+  (error) =&gt; {
+    const isAuthApi = error.config?.url?.<span class="f">startsWith</span>('/auth');   <span class="c">// 로그인 실패 401은 제외</span>
+    <span class="k">if</span> (axios.<span class="f">isAxiosError</span>(error) &amp;&amp; error.response?.status === <span class="n">401</span> &amp;&amp; !isAuthApi) {
+      localStorage.<span class="f">removeItem</span>('accessToken');
+      localStorage.<span class="f">removeItem</span>('username');
+      <span class="f">alert</span>('로그인이 필요합니다.');
+      window.location.href = '/login';
+    }
+    <span class="k">return</span> <span class="t">Promise</span>.<span class="f">reject</span>(error);
+  },
+);
+
+<span class="c">// 서버가 보낸 오류 문구 꺼내기 — { "message": "..." }</span>
+export function <span class="f">getErrorMessage</span>(err: unknown): string {
+  <span class="k">if</span> (axios.<span class="f">isAxiosError</span>(err)) {
+    <span class="k">return</span> err.response?.data?.message ?? err.message;
+  }
+  <span class="k">return</span> '알 수 없는 오류가 발생했습니다.';
+}
+
+export default api;</pre></div><div class="concept"><h3 class="blk">📖 인터셉터(interceptor)란?</h3><p>요청이 나가기 <b>직전</b>, 응답이 화면 코드에 도착하기 <b>직전</b>에 끼어들어 공통 작업을 하는 함수다. 화면마다 토큰을 붙이거나 401을 처리하는 코드를 쓰지 않고 <b>한곳</b>에서 끝낸다.</p><div class="flow"><span class="box">화면<br><small>createPost(form)</small></span><span class="arr">→</span><span class="box">요청 인터셉터<br><small>Bearer 토큰 추가</small></span><span class="arr">→</span><span class="box">서버</span><span class="arr">→</span><span class="box">응답 인터셉터<br><small>401 → 로그인 화면</small></span><span class="arr">→</span><span class="box">화면</span></div></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>baseURL</code></td><td>이후 <code>api.get('/posts')</code>처럼 뒷부분만 쓴다 → <code>http://localhost:8080/api/posts</code></td></tr><tr><td><code>localStorage.getItem('accessToken')</code></td><td>브라우저 저장소에서 토큰 꺼내기 (9단원에서 로그인할 때 저장)</td></tr><tr><td><code>`Bearer ${token}`</code></td><td>JWT를 보낼 때 쓰는 정해진 형식 — <code>Bearer</code> 뒤에 공백 한 칸</td></tr><tr><td><code>!isAuthApi</code></td><td>로그인 API의 401(비밀번호 틀림)은 화면에서 직접 문구를 보여 주므로 제외</td></tr><tr><td><code>window.location.href = '/login'</code></td><td>페이지를 새로 불러오며 이동 → 로그인 상태가 처음부터 다시 읽힌다</td></tr><tr><td><code>Promise.reject(error)</code></td><td>오류를 화면 코드의 <code>catch</code>로 넘긴다</td></tr><tr><td><code>err: unknown</code></td><td><code>catch</code>로 받은 값은 무엇인지 모르므로 <code>unknown</code> → <code>axios.isAxiosError()</code>로 확인 후 사용</td></tr></tbody></table><div class="warn"><span class="lbl">⚠️ 토큰 저장 위치</span> <code>localStorage</code>는 같은 사이트의 JavaScript라면 누구나 읽을 수 있다. 게시판에 다른 사람이 넣은 스크립트가 실행되는 <b>XSS</b> 취약점이 있으면 토큰을 빼앗길 수 있다. React는 <code>{post.content}</code>처럼 출력하면 HTML을 자동으로 이스케이프하므로 기본적으로 안전하지만, <code>dangerouslySetInnerHTML</code>은 쓰지 않는다. 실무에서는 <b>httpOnly 쿠키</b> + 리프레시 토큰 방식도 함께 검토한다.</div><h3 class="part">8-3. API 함수 — api/auth.ts · api/posts.ts</h3><div class="ex"><div class="lbl">💡 src/api/auth.ts</div><pre><span class="k">import</span> api from './api';
+<span class="k">import</span> type { <span class="t">AuthForm</span>, <span class="t">LoginResponse</span> } from '../types/auth';
+
+<span class="c">// 회원가입 — POST /api/auth/signup</span>
+export async function <span class="f">signup</span>(form: <span class="t">AuthForm</span>): <span class="t">Promise</span>&lt;<span class="k">void</span>&gt; {
+  await api.<span class="f">post</span>('/auth/signup', form);
+}
+
+<span class="c">// 로그인 — POST /api/auth/login → 토큰</span>
+export async function <span class="f">login</span>(form: <span class="t">AuthForm</span>): <span class="t">Promise</span>&lt;<span class="t">LoginResponse</span>&gt; {
+  const response = await api.post&lt;<span class="t">LoginResponse</span>&gt;('/auth/login', form);
+  <span class="k">return</span> response.data;
+}</pre></div><div class="ex"><div class="lbl">💡 src/api/posts.ts</div><pre><span class="k">import</span> api from './api';
+<span class="k">import</span> type { <span class="t">Post</span>, <span class="t">PostForm</span>, <span class="t">SearchType</span> } from '../types/post';
+
+<span class="c">// 목록 · 검색 — GET /api/posts?type=title&amp;keyword=가입</span>
+export async function <span class="f">getPosts</span>(type?: <span class="t">SearchType</span>, keyword?: string): <span class="t">Promise</span>&lt;<span class="t">Post</span>[]&gt; {
+  const response = await api.get&lt;<span class="t">Post</span>[]&gt;('/posts', { params: { type, keyword } });
+  <span class="k">return</span> response.data;
+}
+
+<span class="c">// 상세 — GET /api/posts/{id}</span>
+export async function <span class="f">getPost</span>(id: number): <span class="t">Promise</span>&lt;<span class="t">Post</span>&gt; {
+  const response = await api.get&lt;<span class="t">Post</span>&gt;(`/posts/${id}`);
+  <span class="k">return</span> response.data;
+}
+
+<span class="c">// 등록 — POST /api/posts (토큰 필요)</span>
+export async function <span class="f">createPost</span>(form: <span class="t">PostForm</span>): <span class="t">Promise</span>&lt;<span class="t">Post</span>&gt; {
+  const response = await api.post&lt;<span class="t">Post</span>&gt;('/posts', form);
+  <span class="k">return</span> response.data;
+}
+
+<span class="c">// 수정 — PUT /api/posts/{id} (본인)</span>
+export async function <span class="f">updatePost</span>(id: number, form: <span class="t">PostForm</span>): <span class="t">Promise</span>&lt;<span class="t">Post</span>&gt; {
+  const response = await api.put&lt;<span class="t">Post</span>&gt;(`/posts/${id}`, form);
+  <span class="k">return</span> response.data;
+}
+
+<span class="c">// 삭제 — DELETE /api/posts/{id} (본인)</span>
+export async function <span class="f">deletePost</span>(id: number): <span class="t">Promise</span>&lt;<span class="k">void</span>&gt; {
+  await api.<span class="f">delete</span>(`/posts/${id}`);
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>api.get&lt;Post[]&gt;(…)</code></td><td>응답 데이터의 타입을 알려 준다 → <code>response.data</code>가 <code>Post[]</code></td></tr><tr><td><code>{ params: { type, keyword } }</code></td><td>주소 뒤에 <code>?type=…&amp;keyword=…</code>를 붙인다. 값이 <code>undefined</code>면 빠진다 → 전체 목록</td></tr><tr><td><code>type?: SearchType</code></td><td><code>?</code> = 넘기지 않아도 되는 매개변수</td></tr><tr><td><code>Promise&lt;void&gt;</code></td><td>돌려줄 값이 없는 비동기 함수</td></tr></tbody></table></section><section class="module" id="m9"><h2><span class="num">9</span> React ③ 로그인 상태 · 라우팅</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>Context로 로그인 상태(아이디)를 모든 화면에서 함께 쓸 수 있다.</li><li>로그인한 사람만 들어가는 화면(PrivateRoute)과 라우팅을 만들 수 있다.</li></ul></div><h3 class="part">9-1. AuthContext.ts — 통로와 useAuth()</h3><div class="ex"><div class="lbl">💡 src/context/AuthContext.ts</div><pre><span class="k">import</span> { createContext, useContext } from 'react';
+<span class="k">import</span> type { <span class="t">AuthForm</span> } from '../types/auth';
+
+export <span class="k">interface</span> <span class="t">AuthContextType</span> {
+  username: string | <span class="k">null</span>;                    <span class="c">// 로그인 아이디 (로그인 전 null)</span>
+  isLoggedIn: <span class="k">boolean</span>;
+  login: (form: <span class="t">AuthForm</span>) =&gt; <span class="t">Promise</span>&lt;<span class="k">void</span>&gt;;
+  logout: () =&gt; <span class="k">void</span>;
+}
+
+export const <span class="t">AuthContext</span> = createContext&lt;<span class="t">AuthContextType</span> | <span class="k">null</span>&gt;(<span class="k">null</span>);
+
+<span class="c">// 화면에서 로그인 상태를 꺼내 쓰는 Hook</span>
+export function <span class="f">useAuth</span>() {
+  const context = <span class="f">useContext</span>(<span class="t">AuthContext</span>);
+  <span class="k">if</span> (!context) {
+    <span class="k">throw</span> <span class="k">new</span> <span class="t">Error</span>('useAuth는 <span class="t">AuthProvider</span> 안에서만 사용할 수 있습니다.');
+  }
+  <span class="k">return</span> context;
+}</pre></div><h3 class="part">9-2. AuthProvider.tsx — 로그인 · 로그아웃</h3><div class="ex"><div class="lbl">💡 src/context/AuthProvider.tsx</div><pre><span class="k">import</span> { useState } from 'react';
+<span class="k">import</span> type { <span class="t">ReactNode</span> } from 'react';
+<span class="k">import</span> { <span class="t">AuthContext</span> } from './<span class="t">AuthContext</span>';
+<span class="k">import</span> { login as loginApi } from '../api/auth';
+<span class="k">import</span> type { <span class="t">AuthForm</span> } from '../types/auth';
+
+export default function <span class="t">AuthProvider</span>({ children }: { children: <span class="t">ReactNode</span> }) {
+  <span class="c">// 새로고침해도 로그인이 유지되도록 localStorage에서 읽어 시작</span>
+  const [username, setUsername] = useState&lt;string | <span class="k">null</span>&gt;(
+    () =&gt; localStorage.<span class="f">getItem</span>('username'),
+  );
+
+  const login = async (form: <span class="t">AuthForm</span>) =&gt; {
+    const data = await <span class="f">loginApi</span>(form);                  <span class="c">// POST /api/auth/login</span>
+    localStorage.<span class="f">setItem</span>('accessToken', data.accessToken);
+    localStorage.<span class="f">setItem</span>('username', data.username);
+    <span class="f">setUsername</span>(data.username);
+  };
+
+  const logout = () =&gt; {
+    localStorage.<span class="f">removeItem</span>('accessToken');
+    localStorage.<span class="f">removeItem</span>('username');
+    <span class="f">setUsername</span>(<span class="k">null</span>);
+  };
+
+  <span class="k">return</span> (
+    &lt;<span class="t">AuthContext</span>.<span class="t">Provider</span> value={{ username, isLoggedIn: username !== <span class="k">null</span>, login, logout }}&gt;
+      {children}
+    &lt;/<span class="t">AuthContext</span>.<span class="t">Provider</span>&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>useState(() =&gt; localStorage.getItem(…))</code></td><td>처음 한 번만 저장소를 읽어 초기값으로 (함수로 넘기면 매번 읽지 않는다)</td></tr><tr><td><code>login as loginApi</code></td><td>API 함수 이름 <code>login</code>이 Provider의 <code>login</code>과 겹쳐서 다른 이름으로 가져온다</td></tr><tr><td><code>localStorage.setItem(…)</code></td><td>토큰 · 아이디 저장 → 8단원 요청 인터셉터가 읽는다</td></tr><tr><td><code>logout</code></td><td>저장소를 비우기만 하면 끝 — 서버에 알릴 필요가 없다 (STATELESS)</td></tr></tbody></table><div class="note"><span class="lbl">📌 파일을 둘로 나눈 이유</span> Context 파일(<code>AuthContext.ts</code>)과 컴포넌트 파일(<code>AuthProvider.tsx</code>)을 나눈 이유: 한 파일에서 컴포넌트와 Hook을 함께 내보내면 Vite의 빠른 새로고침(Fast Refresh)이 동작하지 않고 ESLint 경고(<code>react-refresh/only-export-components</code>)가 난다.</div><h3 class="part">9-3. Header.tsx — 로그인 상태 표시</h3><div class="ex"><div class="lbl">💡 src/components/Header.tsx</div><pre><span class="k">import</span> { <span class="t">Link</span>, useNavigate } from 'react-router-dom';
+<span class="k">import</span> { useAuth } from '../context/<span class="t">AuthContext</span>';
+
+export default function <span class="t">Header</span>() {
+  const { username, isLoggedIn, logout } = <span class="f">useAuth</span>();
+  const navigate = <span class="f">useNavigate</span>();
+
+  const handleLogout = () =&gt; {
+    <span class="f">logout</span>();
+    <span class="f">navigate</span>('/');
+  };
+
+  <span class="k">return</span> (
+    &lt;header&gt;
+      {<span class="c">/* 로그인 상태 (오른쪽 위) */</span>}
+      &lt;div className=<span class="s">"container d-flex justify-content-end align-items-center gap-2 py-2"</span>&gt;
+        {isLoggedIn ? (
+          &lt;&gt;
+            &lt;span&gt;{username}님&lt;/span&gt;
+            &lt;button className=<span class="s">"btn btn-outline-secondary btn-sm"</span> onClick={handleLogout}&gt;로그아웃&lt;/button&gt;
+          &lt;/&gt;
+        ) : (
+          &lt;&gt;
+            &lt;<span class="t">Link</span> to=<span class="s">"/login"</span> className=<span class="s">"btn btn-outline-primary btn-sm"</span>&gt;로그인&lt;/<span class="t">Link</span>&gt;
+            &lt;<span class="t">Link</span> to=<span class="s">"/signup"</span> className=<span class="s">"btn btn-outline-secondary btn-sm"</span>&gt;회원가입&lt;/<span class="t">Link</span>&gt;
+          &lt;/&gt;
+        )}
+      &lt;/div&gt;
+      &lt;div className=<span class="s">"p-5 mb-4 text-center bg-light"</span>&gt;
+        &lt;h1 className=<span class="s">"mb-0"</span>&gt;
+          &lt;<span class="t">Link</span> to=<span class="s">"/"</span> className=<span class="s">"text-reset text-decoration-none"</span>&gt;<span class="t">My</span> <span class="t">Board</span>&lt;/<span class="t">Link</span>&gt;
+        &lt;/h1&gt;
+      &lt;/div&gt;
+    &lt;/header&gt;
+  );
+}</pre></div><div class="note"><span class="lbl">📌 6장과 비교</span> 6장 Thymeleaf의 로그인 상태 영역(<code>th:if="${loginUser == null}"</code>)과 같은 화면이다. JSX에서는 <code>조건 ? A : B</code>로 고르고, 태그 여러 개는 <code>&lt;&gt;…&lt;/&gt;</code>(Fragment)로 묶는다. 로그아웃은 서버 요청 없이 토큰만 지운다.</div><h3 class="part">9-4. PrivateRoute.tsx — 로그인한 사람만</h3><div class="ex"><div class="lbl">💡 src/components/PrivateRoute.tsx</div><pre><span class="k">import</span> { <span class="t">Navigate</span>, <span class="t">Outlet</span>, useLocation } from 'react-router-dom';
+<span class="k">import</span> { useAuth } from '../context/<span class="t">AuthContext</span>';
+
+<span class="c">// 로그인한 사람만 들어갈 수 있는 화면을 감싼다</span>
+export default function <span class="t">PrivateRoute</span>() {
+  const { isLoggedIn } = <span class="f">useAuth</span>();
+  const location = <span class="f">useLocation</span>();
+
+  <span class="k">if</span> (!isLoggedIn) {
+    <span class="c">// 로그인 후 원래 가려던 화면으로 돌아오도록 주소를 넘긴다</span>
+    <span class="k">return</span> &lt;<span class="t">Navigate</span> to=<span class="s">"/login"</span> replace state={{ from: location.pathname }} /&gt;;
+  }
+  <span class="k">return</span> &lt;<span class="t">Outlet</span> /&gt;;   <span class="c">// 감싼 자식 Route 화면을 그린다</span>
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>&lt;Navigate to="/login" replace /&gt;</code></td><td>그리는 순간 로그인 화면으로 이동. <code>replace</code> → 뒤로 가기에 남지 않음</td></tr><tr><td><code>state={{ from: … }}</code></td><td>이동하면서 값 전달 → 로그인 화면이 <code>useLocation().state</code>로 받는다</td></tr><tr><td><code>&lt;Outlet /&gt;</code></td><td>App.tsx에서 이 Route 안에 넣은 자식 Route(글쓰기 · 수정)가 그려지는 자리</td></tr></tbody></table><div class="note"><span class="lbl">💡 화면 막기 vs 서버 막기</span> 화면을 막는 것은 <b>편의</b>일 뿐이다. 진짜 보안은 서버(토큰 없으면 401, 남의 글이면 403)가 맡는다. 6장에서 상세 화면 버튼을 숨기고 서버에서 한 번 더 막은 것과 같은 원리다.</div><h3 class="part">9-5. App.tsx — 라우팅</h3><div class="ex"><div class="lbl">💡 src/App.tsx</div><pre><span class="k">import</span> { <span class="t">BrowserRouter</span>, <span class="t">Routes</span>, <span class="t">Route</span> } from 'react-router-dom';
+<span class="k">import</span> <span class="t">AuthProvider</span> from './context/<span class="t">AuthProvider</span>';
+<span class="k">import</span> <span class="t">Header</span> from './components/<span class="t">Header</span>';
+<span class="k">import</span> <span class="t">PrivateRoute</span> from './components/<span class="t">PrivateRoute</span>';
+<span class="k">import</span> <span class="t">Home</span> from './pages/<span class="t">Home</span>';
+<span class="k">import</span> <span class="t">PostList</span> from './pages/<span class="t">PostList</span>';
+<span class="k">import</span> <span class="t">PostDetail</span> from './pages/<span class="t">PostDetail</span>';
+<span class="k">import</span> <span class="t">PostWrite</span> from './pages/<span class="t">PostWrite</span>';
+<span class="k">import</span> <span class="t">Login</span> from './pages/<span class="t">Login</span>';
+<span class="k">import</span> <span class="t">Signup</span> from './pages/<span class="t">Signup</span>';
+
+export default function <span class="t">App</span>() {
+  <span class="k">return</span> (
+    &lt;<span class="t">AuthProvider</span>&gt;
+      &lt;<span class="t">BrowserRouter</span>&gt;
+        &lt;<span class="t">Header</span> /&gt;
+        &lt;main className=<span class="s">"container pb-5"</span>&gt;
+          &lt;<span class="t">Routes</span>&gt;
+            &lt;<span class="t">Route</span> path=<span class="s">"/"</span> element={&lt;<span class="t">Home</span> /&gt;} /&gt;
+            &lt;<span class="t">Route</span> path=<span class="s">"/posts"</span> element={&lt;<span class="t">PostList</span> /&gt;} /&gt;
+            &lt;<span class="t">Route</span> path=<span class="s">"/posts/:id"</span> element={&lt;<span class="t">PostDetail</span> /&gt;} /&gt;
+            &lt;<span class="t">Route</span> path=<span class="s">"/login"</span> element={&lt;<span class="t">Login</span> /&gt;} /&gt;
+            &lt;<span class="t">Route</span> path=<span class="s">"/signup"</span> element={&lt;<span class="t">Signup</span> /&gt;} /&gt;
+
+            {<span class="c">/* 로그인 필요 */</span>}
+            &lt;<span class="t">Route</span> element={&lt;<span class="t">PrivateRoute</span> /&gt;}&gt;
+              &lt;<span class="t">Route</span> path=<span class="s">"/posts/new"</span> element={&lt;<span class="t">PostWrite</span> /&gt;} /&gt;
+              &lt;<span class="t">Route</span> path=<span class="s">"/posts/:id/edit"</span> element={&lt;<span class="t">PostWrite</span> /&gt;} /&gt;
+            &lt;/<span class="t">Route</span>&gt;
+          &lt;/<span class="t">Routes</span>&gt;
+        &lt;/main&gt;
+      &lt;/<span class="t">BrowserRouter</span>&gt;
+    &lt;/<span class="t">AuthProvider</span>&gt;
+  );
+}</pre></div><table><thead><tr><th>구성</th><th>의미</th></tr></thead><tbody><tr><td><code>&lt;AuthProvider&gt;</code></td><td>모든 화면을 감싸서 <code>useAuth()</code>를 쓸 수 있게 한다</td></tr><tr><td><code>&lt;Header /&gt;</code></td><td><code>&lt;Routes&gt;</code> 밖 → 모든 화면 위에 항상 보인다</td></tr><tr><td><code>&lt;Route element={&lt;PrivateRoute /&gt;}&gt;</code></td><td>주소 없이 화면만 감싸는 Route — 안쪽 Route 두 개가 로그인 필요</td></tr><tr><td><code>/posts/new</code> · <code>/posts/:id/edit</code></td><td>글쓰기 · 수정이 <b>같은 컴포넌트</b> <code>PostWrite</code> (5장 <code>newPost.html</code>과 같은 방식)</td></tr></tbody></table><div class="warn"><span class="lbl">⚠️ /posts/new와 /posts/:id</span> <code>/posts/new</code>와 <code>/posts/:id</code>는 모양이 비슷하지만, React Router는 <b>고정 경로(new)를 먼저</b> 맞춘다. <code>/posts/new</code>가 상세 화면(id = "new")으로 가지 않는다.</div></section><section class="module" id="m10"><h2><span class="num">10</span> React ④ 회원가입 · 로그인 화면</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>제어 컴포넌트로 회원가입 · 로그인 폼을 만들 수 있다.</li><li>로그인 후 원래 가려던 화면으로 돌아가게 할 수 있다.</li></ul></div><h3 class="part">10-1. Signup.tsx — 회원가입</h3><div class="ex"><div class="lbl">💡 src/pages/Signup.tsx</div><pre><span class="k">import</span> { useState } from 'react';
+<span class="k">import</span> type { <span class="t">ChangeEvent</span>, <span class="t">FormEvent</span> } from 'react';
+<span class="k">import</span> { <span class="t">Link</span>, useNavigate } from 'react-router-dom';
+<span class="k">import</span> { signup } from '../api/auth';
+<span class="k">import</span> { getErrorMessage } from '../api/api';
+<span class="k">import</span> type { <span class="t">AuthForm</span> } from '../types/auth';
+
+export default function <span class="t">Signup</span>() {
+  const navigate = <span class="f">useNavigate</span>();
+  const [form, setForm] = useState&lt;<span class="t">AuthForm</span>&gt;({ username: '', password: '' });
+  const [error, setError] = <span class="f">useState</span>('');
+
+  const handleChange = (e: <span class="t">ChangeEvent</span>&lt;<span class="t">HTMLInputElement</span>&gt;) =&gt; {
+    const { name, value } = e.target;
+    <span class="f">setForm</span>(prev =&gt; ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: <span class="t">FormEvent</span>&lt;<span class="t">HTMLFormElement</span>&gt;) =&gt; {
+    e.<span class="f">preventDefault</span>();
+    <span class="k">try</span> {
+      await <span class="f">signup</span>(form);                                   <span class="c">// POST /api/auth/signup</span>
+      <span class="f">navigate</span>('/login', { replace: <span class="k">true</span>, state: { signup: <span class="k">true</span> } });
+    } <span class="k">catch</span> (err) {
+      <span class="f">setError</span>(<span class="f">getErrorMessage</span>(err));                       <span class="c">// "이미 사용 중인 아이디입니다."</span>
+    }
+  };
+
+  <span class="k">return</span> (
+    &lt;div className=<span class="s">"mx-auto"</span> style={{ maxWidth: <span class="n">420</span> }}&gt;
+      &lt;h2 className=<span class="s">"mb-4"</span>&gt;회원가입&lt;/h2&gt;
+      {error &amp;&amp; &lt;div className=<span class="s">"alert alert-danger"</span>&gt;{error}&lt;/div&gt;}
+
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"username"</span> className=<span class="s">"form-label"</span>&gt;아이디&lt;/label&gt;
+          &lt;input id=<span class="s">"username"</span> name=<span class="s">"username"</span> className=<span class="s">"form-control"</span> maxLength={<span class="n">20</span>}
+                 value={form.username} onChange={handleChange} required /&gt;
+        &lt;/div&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"password"</span> className=<span class="s">"form-label"</span>&gt;비밀번호&lt;/label&gt;
+          &lt;input id=<span class="s">"password"</span> name=<span class="s">"password"</span> type=<span class="s">"password"</span> className=<span class="s">"form-control"</span>
+                 value={form.password} onChange={handleChange} required /&gt;
+        &lt;/div&gt;
+        &lt;button type=<span class="s">"submit"</span> className=<span class="s">"btn btn-primary w-100"</span>&gt;가입하기&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;p className=<span class="s">"text-center mt-3"</span>&gt;이미 회원이면 &lt;<span class="t">Link</span> to=<span class="s">"/login"</span>&gt;로그인&lt;/<span class="t">Link</span>&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>value={form.username}</code> + <code>onChange</code></td><td>입력값을 상태로 관리하는 <b>제어 컴포넌트</b></td></tr><tr><td><code>[name]: value</code></td><td>input의 <code>name</code>으로 어느 필드인지 구분 → 입력칸이 여러 개여도 함수 하나</td></tr><tr><td><code>e.preventDefault()</code></td><td>폼 제출 시 페이지 새로고침 막기</td></tr><tr><td><code>state: { signup: true }</code></td><td>로그인 화면에 “가입 완료” 표시를 알린다 (6장 <code>/login?signup</code>과 같은 역할)</td></tr><tr><td><code>htmlFor</code> · <code>maxLength={20}</code></td><td>JSX 속성 이름 — HTML의 <code>for</code> · <code>maxlength</code></td></tr></tbody></table><h3 class="part">10-2. Login.tsx — 로그인</h3><div class="ex"><div class="lbl">💡 src/pages/Login.tsx</div><pre><span class="k">import</span> { useState } from 'react';
+<span class="k">import</span> type { <span class="t">ChangeEvent</span>, <span class="t">FormEvent</span> } from 'react';
+<span class="k">import</span> { <span class="t">Link</span>, useLocation, useNavigate } from 'react-router-dom';
+<span class="k">import</span> { useAuth } from '../context/<span class="t">AuthContext</span>';
+<span class="k">import</span> { getErrorMessage } from '../api/api';
+<span class="k">import</span> type { <span class="t">AuthForm</span> } from '../types/auth';
+
+export default function <span class="t">Login</span>() {
+  const { login } = <span class="f">useAuth</span>();
+  const navigate = <span class="f">useNavigate</span>();
+  const location = <span class="f">useLocation</span>();
+  const state = location.state as { from?: string; signup?: <span class="k">boolean</span> } | <span class="k">null</span>;
+  const from = state?.from ?? '/posts';          <span class="c">// 로그인 후 갈 곳 (없으면 글 목록)</span>
+
+  const [form, setForm] = useState&lt;<span class="t">AuthForm</span>&gt;({ username: '', password: '' });
+  const [error, setError] = <span class="f">useState</span>('');
+
+  const handleChange = (e: <span class="t">ChangeEvent</span>&lt;<span class="t">HTMLInputElement</span>&gt;) =&gt; {
+    const { name, value } = e.target;
+    <span class="f">setForm</span>(prev =&gt; ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: <span class="t">FormEvent</span>&lt;<span class="t">HTMLFormElement</span>&gt;) =&gt; {
+    e.<span class="f">preventDefault</span>();
+    <span class="k">try</span> {
+      await <span class="f">login</span>(form);                          <span class="c">// 토큰 받아 저장 (AuthProvider)</span>
+      <span class="f">navigate</span>(from, { replace: <span class="k">true</span> });
+    } <span class="k">catch</span> (err) {
+      <span class="f">setError</span>(<span class="f">getErrorMessage</span>(err));             <span class="c">// "아이디 또는 비밀번호가 올바르지 않습니다."</span>
+    }
+  };
+
+  <span class="k">return</span> (
+    &lt;div className=<span class="s">"mx-auto"</span> style={{ maxWidth: <span class="n">420</span> }}&gt;
+      &lt;h2 className=<span class="s">"mb-4"</span>&gt;로그인&lt;/h2&gt;
+      {state?.signup &amp;&amp; &lt;div className=<span class="s">"alert alert-success"</span>&gt;회원가입이 완료되었습니다. 로그인하세요.&lt;/div&gt;}
+      {error &amp;&amp; &lt;div className=<span class="s">"alert alert-danger"</span>&gt;{error}&lt;/div&gt;}
+
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"username"</span> className=<span class="s">"form-label"</span>&gt;아이디&lt;/label&gt;
+          &lt;input id=<span class="s">"username"</span> name=<span class="s">"username"</span> className=<span class="s">"form-control"</span>
+                 value={form.username} onChange={handleChange} required /&gt;
+        &lt;/div&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"password"</span> className=<span class="s">"form-label"</span>&gt;비밀번호&lt;/label&gt;
+          &lt;input id=<span class="s">"password"</span> name=<span class="s">"password"</span> type=<span class="s">"password"</span> className=<span class="s">"form-control"</span>
+                 value={form.password} onChange={handleChange} required /&gt;
+        &lt;/div&gt;
+        &lt;button type=<span class="s">"submit"</span> className=<span class="s">"btn btn-primary w-100"</span>&gt;로그인&lt;/button&gt;
+      &lt;/form&gt;
+      &lt;p className=<span class="s">"text-center mt-3"</span>&gt;아직 회원이 아니면 &lt;<span class="t">Link</span> to=<span class="s">"/signup"</span>&gt;회원가입&lt;/<span class="t">Link</span>&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>location.state as { … } | null</code></td><td>다른 화면이 넘겨준 값. 모양을 TypeScript에 알려 준다 (주소창으로 바로 오면 <code>null</code>)</td></tr><tr><td><code>state?.from ?? '/posts'</code></td><td><code>?.</code> — state가 null이어도 오류 없이 <code>undefined</code> / <code>??</code> — 왼쪽이 없으면 오른쪽 값</td></tr><tr><td><code>navigate(from, { replace: true })</code></td><td>PrivateRoute가 넘겨준 화면(예: <code>/posts/new</code>)으로 돌아간다</td></tr><tr><td><code>catch</code> → <code>setError</code></td><td>로그인 실패 401은 인터셉터가 넘겨주므로(<code>/auth</code> 제외) 화면에 빨간 문구</td></tr></tbody></table></section><section class="module" id="m11"><h2><span class="num">11</span> React ⑤ 게시판 화면 — 목록 · 검색 · 상세 · 글쓰기</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>useEffect로 서버 데이터를 불러와 목록 · 상세 화면을 만들 수 있다.</li><li>useSearchParams로 검색 조건을 주소에 남길 수 있다.</li><li>하나의 폼 컴포넌트로 글쓰기 · 수정을 처리하고, 본인 글일 때만 버튼을 보여 줄 수 있다.</li></ul></div><h3 class="part">11-1. Home.tsx — 메인</h3><div class="ex"><div class="lbl">💡 src/pages/Home.tsx</div><pre><span class="k">import</span> { useEffect, useState } from 'react';
+<span class="k">import</span> { <span class="t">Link</span> } from 'react-router-dom';
+<span class="k">import</span> { getPosts } from '../api/posts';
+
+export default function <span class="t">Home</span>() {
+  const [postCount, setPostCount] = <span class="f">useState</span>(<span class="n">0</span>);
+
+  <span class="c">// 화면이 처음 그려질 때 한 번 — 전체 글 수</span>
+  <span class="f">useEffect</span>(() =&gt; {
+    <span class="f">getPosts</span>().<span class="f">then</span>(posts =&gt; <span class="f">setPostCount</span>(posts.length));
+  }, []);
+
+  <span class="k">return</span> (
+    &lt;div className=<span class="s">"text-center py-4"</span>&gt;
+      &lt;p className=<span class="s">"lead"</span>&gt;<span class="t">Spring</span> <span class="t">Boot</span> <span class="t">REST</span> <span class="t">API</span> + <span class="t">React로</span> 만든 게시판입니다.&lt;/p&gt;
+      &lt;p className=<span class="s">"text-muted"</span>&gt;전체 글 {postCount}개&lt;/p&gt;
+      &lt;div className=<span class="s">"d-flex justify-content-center gap-2 mt-4"</span>&gt;
+        &lt;<span class="t">Link</span> to=<span class="s">"/posts"</span> className=<span class="s">"btn btn-primary btn-lg"</span>&gt;글목록 가기&lt;/<span class="t">Link</span>&gt;
+        &lt;<span class="t">Link</span> to=<span class="s">"/posts/new"</span> className=<span class="s">"btn btn-primary btn-lg"</span>&gt;글등록 가기&lt;/<span class="t">Link</span>&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}</pre></div><div class="note"><span class="lbl">📌 요청이 두 번?</span> 개발 모드에서는 <code>&lt;StrictMode&gt;</code>가 실수를 찾으려고 <code>useEffect</code>를 <b>두 번</b> 실행한다. F12 → Network에 <code>posts</code> 요청이 두 번 보여도 정상이다. 배포 빌드(<code>npm run build</code>)에서는 한 번만 실행된다.</div><h3 class="part">11-2. PostList.tsx — 목록 · 검색</h3><div class="ex"><div class="lbl">💡 src/pages/PostList.tsx</div><pre><span class="k">import</span> { useEffect, useState } from 'react';
+<span class="k">import</span> type { <span class="t">FormEvent</span> } from 'react';
+<span class="k">import</span> { <span class="t">Link</span>, useSearchParams } from 'react-router-dom';
+<span class="k">import</span> dayjs from 'dayjs';
+<span class="k">import</span> { getPosts } from '../api/posts';
+<span class="k">import</span> type { <span class="t">Post</span>, <span class="t">SearchType</span> } from '../types/post';
+
+export default function <span class="t">PostList</span>() {
+  <span class="c">// 주소의 ?type=title&amp;keyword=가입 읽기</span>
+  const [searchParams, setSearchParams] = <span class="f">useSearchParams</span>();
+  const type = (searchParams.<span class="f">get</span>('type') ?? 'title') as <span class="t">SearchType</span>;
+  const keyword = searchParams.<span class="f">get</span>('keyword') ?? '';
+
+  const [posts, setPosts] = useState&lt;<span class="t">Post</span>[]&gt;([]);
+  const [isLoading, setIsLoading] = <span class="f">useState</span>(<span class="k">true</span>);
+  <span class="c">// 검색 폼 입력값</span>
+  const [inputType, setInputType] = useState&lt;<span class="t">SearchType</span>&gt;(type);
+  const [inputKeyword, setInputKeyword] = <span class="f">useState</span>(keyword);
+
+  <span class="c">// 주소의 type · keyword가 바뀔 때마다 다시 불러온다</span>
+  <span class="f">useEffect</span>(() =&gt; {
+    <span class="f">getPosts</span>(type, keyword)
+      .<span class="f">then</span>(setPosts)
+      .<span class="f">finally</span>(() =&gt; <span class="f">setIsLoading</span>(<span class="k">false</span>));
+  }, [type, keyword]);
+
+  const handleSearch = (e: <span class="t">FormEvent</span>&lt;<span class="t">HTMLFormElement</span>&gt;) =&gt; {
+    e.<span class="f">preventDefault</span>();
+    <span class="k">if</span> (inputKeyword.<span class="f">trim</span>()) {
+      <span class="f">setSearchParams</span>({ type: inputType, keyword: inputKeyword.<span class="f">trim</span>() });
+    } <span class="k">else</span> {
+      <span class="f">setSearchParams</span>({});            <span class="c">// 검색어가 없으면 전체 목록</span>
+    }
+  };
+
+  const handleReset = () =&gt; {
+    <span class="f">setInputType</span>('title');
+    <span class="f">setInputKeyword</span>('');
+    <span class="f">setSearchParams</span>({});
+  };
+
+  <span class="k">return</span> (
+    &lt;&gt;
+      {<span class="c">/* 검색 */</span>}
+      &lt;form onSubmit={handleSearch} className=<span class="s">"row g-2 justify-content-end mb-3"</span>&gt;
+        &lt;div className=<span class="s">"col-auto"</span>&gt;
+          &lt;select className=<span class="s">"form-select"</span> value={inputType}
+                  onChange={e =&gt; <span class="f">setInputType</span>(e.target.value as <span class="t">SearchType</span>)}&gt;
+            &lt;option value=<span class="s">"title"</span>&gt;제목&lt;/option&gt;
+            &lt;option value=<span class="s">"content"</span>&gt;내용&lt;/option&gt;
+            &lt;option value=<span class="s">"writer"</span>&gt;글쓴이&lt;/option&gt;
+          &lt;/select&gt;
+        &lt;/div&gt;
+        &lt;div className=<span class="s">"col-auto"</span>&gt;
+          &lt;input className=<span class="s">"form-control"</span> placeholder=<span class="s">"검색어를 입력하세요"</span>
+                 value={inputKeyword} onChange={e =&gt; <span class="f">setInputKeyword</span>(e.target.value)} /&gt;
+        &lt;/div&gt;
+        &lt;div className=<span class="s">"col-auto"</span>&gt;
+          &lt;button type=<span class="s">"submit"</span> className=<span class="s">"btn btn-outline-primary me-1"</span>&gt;검색&lt;/button&gt;
+          &lt;button type=<span class="s">"button"</span> className=<span class="s">"btn btn-outline-secondary"</span> onClick={handleReset}&gt;초기화&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+
+      &lt;div className=<span class="s">"d-flex justify-content-between align-items-center mb-3"</span>&gt;
+        &lt;span&gt;전체 {posts.length}건&lt;/span&gt;
+        &lt;<span class="t">Link</span> to=<span class="s">"/posts/new"</span> className=<span class="s">"btn btn-primary"</span>&gt;글쓰기&lt;/<span class="t">Link</span>&gt;
+      &lt;/div&gt;
+
+      &lt;table className=<span class="s">"table table-hover"</span>&gt;
+        &lt;thead className=<span class="s">"table-light"</span>&gt;
+          &lt;tr&gt;
+            &lt;th style={{ width: <span class="n">80</span> }}&gt;번호&lt;/th&gt;
+            &lt;th&gt;제목&lt;/th&gt;
+            &lt;th style={{ width: <span class="n">120</span> }}&gt;글쓴이&lt;/th&gt;
+            &lt;th style={{ width: <span class="n">170</span> }}&gt;작성일&lt;/th&gt;
+          &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+          {posts.<span class="f">map</span>(post =&gt; (
+            &lt;tr key={post.id}&gt;
+              &lt;td&gt;{post.id}&lt;/td&gt;
+              &lt;td&gt;&lt;<span class="t">Link</span> to={`/posts/${post.id}`}&gt;{post.title}&lt;/<span class="t">Link</span>&gt;&lt;/td&gt;
+              &lt;td&gt;{post.writer}&lt;/td&gt;
+              &lt;td&gt;{<span class="f">dayjs</span>(post.createdAt).<span class="f">format</span>('<span class="t">YYYY</span>-<span class="t">MM</span>-<span class="t">DD</span> <span class="t">HH</span>:mm')}&lt;/td&gt;
+            &lt;/tr&gt;
+          ))}
+          {!isLoading &amp;&amp; posts.length === <span class="n">0</span> &amp;&amp; (
+            &lt;tr&gt;
+              &lt;td colSpan={<span class="n">4</span>} className=<span class="s">"text-center text-muted"</span>&gt;
+                {keyword ? '검색 결과가 없습니다.' : '등록된 글이 없습니다.'}
+              &lt;/td&gt;
+            &lt;/tr&gt;
+          )}
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>useSearchParams()</code></td><td>주소의 쿼리 스트링을 읽고(<code>get</code>) 바꾸는(<code>setSearchParams</code>) Hook — 5장 <code>${param.keyword}</code>와 같은 역할</td></tr><tr><td><code>setSearchParams({ type, keyword })</code></td><td>주소가 <code>/posts?type=content&amp;keyword=전산</code>으로 바뀐다 → 새로고침 · 뒤로 가기에도 검색 유지</td></tr><tr><td><code>useEffect(…, [type, keyword])</code></td><td>두 값이 바뀔 때마다 서버에 다시 요청</td></tr><tr><td><code>.then(setPosts)</code></td><td><code>.then(data =&gt; setPosts(data))</code>를 줄여 쓴 것</td></tr><tr><td><code>posts.map(post =&gt; &lt;tr key={post.id}&gt;)</code></td><td>배열 반복 — <code>key</code>는 행을 구별하는 고유값 (5장 <code>th:each</code>)</td></tr><tr><td><code>{조건 &amp;&amp; (…)}</code></td><td>조건이 참일 때만 그리기 (5장 <code>th:if</code>)</td></tr></tbody></table><h3 class="part">11-3. PostDetail.tsx — 상세 · 삭제</h3><div class="ex"><div class="lbl">💡 src/pages/PostDetail.tsx</div><pre><span class="k">import</span> { useEffect, useState } from 'react';
+<span class="k">import</span> { <span class="t">Link</span>, useNavigate, useParams } from 'react-router-dom';
+<span class="k">import</span> dayjs from 'dayjs';
+<span class="k">import</span> { deletePost, getPost } from '../api/posts';
+<span class="k">import</span> { getErrorMessage } from '../api/api';
+<span class="k">import</span> { useAuth } from '../context/<span class="t">AuthContext</span>';
+<span class="k">import</span> type { <span class="t">Post</span> } from '../types/post';
+
+export default function <span class="t">PostDetail</span>() {
+  const { id } = <span class="f">useParams</span>();                 <span class="c">// /posts/3 → "3"</span>
+  const navigate = <span class="f">useNavigate</span>();
+  const { username } = <span class="f">useAuth</span>();
+  const [post, setPost] = useState&lt;<span class="t">Post</span> | <span class="k">null</span>&gt;(<span class="k">null</span>);
+  const [error, setError] = <span class="f">useState</span>('');
+
+  <span class="f">useEffect</span>(() =&gt; {
+    <span class="f">getPost</span>(<span class="t">Number</span>(id))
+      .<span class="f">then</span>(setPost)
+      .<span class="k">catch</span>(err =&gt; <span class="f">setError</span>(<span class="f">getErrorMessage</span>(err)));
+  }, [id]);
+
+  const handleDelete = async () =&gt; {
+    <span class="k">if</span> (!post || !<span class="f">confirm</span>('정말 삭제할까요?')) <span class="k">return</span>;
+    <span class="k">try</span> {
+      await <span class="f">deletePost</span>(post.id);
+      <span class="f">alert</span>('삭제되었습니다.');
+      <span class="f">navigate</span>('/posts', { replace: <span class="k">true</span> });
+    } <span class="k">catch</span> (err) {
+      <span class="f">alert</span>(<span class="f">getErrorMessage</span>(err));            <span class="c">// 403 "본인이 쓴 글만 …"</span>
+    }
+  };
+
+  <span class="k">if</span> (error) <span class="k">return</span> &lt;p className=<span class="s">"text-danger"</span>&gt;{error}&lt;/p&gt;;
+  <span class="k">if</span> (!post) <span class="k">return</span> &lt;p className=<span class="s">"text-muted"</span>&gt;불러오는 중…&lt;/p&gt;;
+
+  const isWriter = username === post.writer;  <span class="c">// 본인 글인가?</span>
+
+  <span class="k">return</span> (
+    &lt;div className=<span class="s">"mx-auto"</span> style={{ width: '<span class="n">60</span>%' }}&gt;
+      &lt;article className=<span class="s">"border rounded p-4"</span>&gt;
+        &lt;header className=<span class="s">"mb-4"</span>&gt;
+          &lt;h2 className=<span class="s">"fw-bolder mb-1"</span>&gt;{post.title}&lt;/h2&gt;
+          &lt;div className=<span class="s">"text-muted fst-italic"</span>&gt;
+            {post.writer} . {<span class="f">dayjs</span>(post.createdAt).<span class="f">format</span>('<span class="t">YYYY</span>-<span class="t">MM</span>-<span class="t">DD</span> <span class="t">HH</span>:mm')}
+          &lt;/div&gt;
+        &lt;/header&gt;
+        &lt;section className=<span class="s">"mb-5"</span>&gt;
+          &lt;p className=<span class="s">"fs-5"</span> style={{ whiteSpace: 'pre-line' }}&gt;{post.content}&lt;/p&gt;
+        &lt;/section&gt;
+
+        &lt;<span class="t">Link</span> to=<span class="s">"/posts"</span> className=<span class="s">"btn btn-secondary btn-sm me-1"</span>&gt;목록&lt;/<span class="t">Link</span>&gt;
+        {isWriter &amp;&amp; (
+          &lt;&gt;
+            &lt;<span class="t">Link</span> to={`/posts/${post.id}/edit`} className=<span class="s">"btn btn-primary btn-sm me-1"</span>&gt;수정&lt;/<span class="t">Link</span>&gt;
+            &lt;button className=<span class="s">"btn btn-danger btn-sm"</span> onClick={handleDelete}&gt;삭제&lt;/button&gt;
+          &lt;/&gt;
+        )}
+      &lt;/article&gt;
+    &lt;/div&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>useParams()</code></td><td>주소의 <code>:id</code> 꺼내기 — 문자열이므로 <code>Number(id)</code>로 바꿔 쓴다</td></tr><tr><td><code>useState&lt;Post | null&gt;(null)</code></td><td>처음엔 글이 없다(null) → 불러오면 Post</td></tr><tr><td><code>if (!post) return …</code></td><td>불러오기 전에는 “불러오는 중…”만 그리고 끝 — 아래 코드에서 <code>post</code>는 null이 아니다</td></tr><tr><td><code>username === post.writer</code></td><td>6장 <code>${loginUser == post.writer}</code>와 같은 비교 — 본인 글일 때만 수정 · 삭제 버튼</td></tr><tr><td><code>style={{ whiteSpace: 'pre-line' }}</code></td><td>JSX의 style은 <b>객체</b> — CSS 이름을 카멜 표기로</td></tr></tbody></table><h3 class="part">11-4. PostWrite.tsx — 글쓰기 · 수정</h3><div class="ex"><div class="lbl">💡 src/pages/PostWrite.tsx</div><pre><span class="k">import</span> { useEffect, useState } from 'react';
+<span class="k">import</span> type { <span class="t">ChangeEvent</span>, <span class="t">FormEvent</span> } from 'react';
+<span class="k">import</span> { useNavigate, useParams } from 'react-router-dom';
+<span class="k">import</span> { createPost, getPost, updatePost } from '../api/posts';
+<span class="k">import</span> { getErrorMessage } from '../api/api';
+<span class="k">import</span> type { <span class="t">PostForm</span> } from '../types/post';
+
+export default function <span class="t">PostWrite</span>() {
+  const { id } = <span class="f">useParams</span>();                 <span class="c">// /posts/3/edit → "3", /posts/new → undefined</span>
+  const isEdit = id !== undefined;            <span class="c">// id가 있으면 수정</span>
+  const navigate = <span class="f">useNavigate</span>();
+  const [form, setForm] = useState&lt;<span class="t">PostForm</span>&gt;({ title: '', content: '' });
+  const [saving, setSaving] = <span class="f">useState</span>(<span class="k">false</span>);
+
+  <span class="c">// 수정이면 기존 글을 불러와 폼에 채운다</span>
+  <span class="f">useEffect</span>(() =&gt; {
+    <span class="k">if</span> (!isEdit) <span class="k">return</span>;
+    <span class="f">getPost</span>(<span class="t">Number</span>(id))
+      .<span class="f">then</span>(post =&gt; <span class="f">setForm</span>({ title: post.title, content: post.content }));
+  }, [id, isEdit]);
+
+  const handleChange = (e: <span class="t">ChangeEvent</span>&lt;<span class="t">HTMLInputElement</span> | <span class="t">HTMLTextAreaElement</span>&gt;) =&gt; {
+    const { name, value } = e.target;
+    <span class="f">setForm</span>(prev =&gt; ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: <span class="t">FormEvent</span>&lt;<span class="t">HTMLFormElement</span>&gt;) =&gt; {
+    e.<span class="f">preventDefault</span>();
+    <span class="k">if</span> (!form.title.<span class="f">trim</span>()) {
+      <span class="f">alert</span>('제목을 입력하세요.');
+      <span class="k">return</span>;
+    }
+    <span class="f">setSaving</span>(<span class="k">true</span>);                          <span class="c">// 저장 중 버튼 막기 (두 번 누르기 방지)</span>
+    <span class="k">try</span> {
+      <span class="k">if</span> (isEdit) {
+        await <span class="f">updatePost</span>(<span class="t">Number</span>(id), form);   <span class="c">// PUT /api/posts/{id}</span>
+        <span class="f">alert</span>('수정되었습니다.');
+        <span class="f">navigate</span>(`/posts/${id}`, { replace: <span class="k">true</span> });
+      } <span class="k">else</span> {
+        const saved = await <span class="f">createPost</span>(form); <span class="c">// POST /api/posts</span>
+        <span class="f">alert</span>('등록되었습니다.');
+        <span class="f">navigate</span>(`/posts/${saved.id}`, { replace: <span class="k">true</span> });
+      }
+    } <span class="k">catch</span> (err) {
+      <span class="f">alert</span>(<span class="f">getErrorMessage</span>(err));            <span class="c">// 403 · 400 문구</span>
+      <span class="f">setSaving</span>(<span class="k">false</span>);
+    }
+  };
+
+  <span class="k">return</span> (
+    &lt;div className=<span class="s">"mx-auto"</span> style={{ width: '<span class="n">60</span>%' }}&gt;
+      &lt;h2 className=<span class="s">"mb-4"</span>&gt;{isEdit ? '글 수정' : '글쓰기'}&lt;/h2&gt;
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"title"</span> className=<span class="s">"form-label"</span>&gt;제목&lt;/label&gt;
+          &lt;input id=<span class="s">"title"</span> name=<span class="s">"title"</span> className=<span class="s">"form-control"</span>
+                 value={form.title} onChange={handleChange} /&gt;
+        &lt;/div&gt;
+        &lt;div className=<span class="s">"mb-3"</span>&gt;
+          &lt;label htmlFor=<span class="s">"content"</span> className=<span class="s">"form-label"</span>&gt;글내용&lt;/label&gt;
+          &lt;textarea id=<span class="s">"content"</span> name=<span class="s">"content"</span> className=<span class="s">"form-control"</span> rows={<span class="n">10</span>}
+                    value={form.content} onChange={handleChange} /&gt;
+        &lt;/div&gt;
+        &lt;button type=<span class="s">"submit"</span> className=<span class="s">"btn btn-primary me-1"</span> disabled={saving}&gt;
+          {isEdit ? '수정' : '등록'}
+        &lt;/button&gt;
+        &lt;button type=<span class="s">"button"</span> className=<span class="s">"btn btn-secondary"</span> onClick={() =&gt; <span class="f">navigate</span>(-<span class="n">1</span>)}&gt;취소&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  );
+}</pre></div><table><thead><tr><th>코드</th><th>의미</th></tr></thead><tbody><tr><td><code>id !== undefined</code></td><td><code>/posts/new</code>에는 <code>:id</code>가 없어 <code>undefined</code> → 글쓰기 (5장 <code>${post == null}</code>)</td></tr><tr><td><code>if (!isEdit) return;</code></td><td>글쓰기면 불러올 글이 없으므로 바로 끝</td></tr><tr><td><code>ChangeEvent&lt;HTMLInputElement | HTMLTextAreaElement&gt;</code></td><td>input과 textarea 둘 다 같은 함수로 처리</td></tr><tr><td><code>navigate(`/posts/${saved.id}`)</code></td><td>등록 응답(201)의 id로 새 글 상세 화면으로</td></tr><tr><td><code>navigate(-1)</code></td><td>뒤로 가기</td></tr><tr><td>글쓴이 입력칸 없음</td><td>writer는 서버가 토큰의 아이디로 넣는다 (6장과 같음)</td></tr></tbody></table></section><section class="module" id="m12"><h2><span class="num">12</span> 실행 확인 · 자주 나는 오류</h2><div class="goal"><div class="lbl">🎯 학습목표</div><ul><li>서버와 React를 함께 실행해 회원가입부터 권한 확인까지 확인할 수 있다.</li><li>JWT · CORS 관련 오류의 원인을 찾을 수 있다.</li></ul></div><h3 class="part">12-1. 실행 순서</h3><table><thead><tr><th>순서</th><th>작업</th><th>확인</th></tr></thead><tbody><tr><td>1</td><td>MySQL 실행 · IntelliJ에서 <code>BoardwebApplication</code> 실행</td><td><code>http://localhost:8080/api/posts</code> → JSON 배열</td></tr><tr><td>2</td><td>VS Code 터미널 → <code>boardweb-client</code> 폴더 → <code>npm run dev</code></td><td><code>http://localhost:5173</code> 메인 화면</td></tr><tr><td>3</td><td>로그인 전 목록 · 상세 · 검색</td><td>모두 보인다. 상세에 수정 · 삭제 버튼 없음</td></tr><tr><td>4</td><td><b>글등록 가기</b></td><td>로그인 화면으로 이동 (PrivateRoute)</td></tr><tr><td>5</td><td><b>회원가입</b> → hong / 1234</td><td>로그인 화면에 “회원가입이 완료되었습니다.”</td></tr><tr><td>6</td><td>hong으로 로그인</td><td><b>글쓰기 화면으로</b> 돌아온다 · 위쪽에 “hong님 · 로그아웃”</td></tr><tr><td>7</td><td>F12 → Application → Local Storage</td><td><code>accessToken</code> · <code>username</code> 저장 확인</td></tr><tr><td>8</td><td>글 등록</td><td>상세 화면 · 글쓴이 hong · F12 Network에서 <code>Authorization: Bearer …</code> 헤더 확인</td></tr><tr><td>9</td><td>로그아웃 → kim으로 가입 · 로그인 → hong의 글 상세</td><td>수정 · 삭제 버튼 <b>없음</b></td></tr><tr><td>10</td><td>kim으로 주소창에 <code>/posts/1/edit</code> → 수정</td><td>“본인이 쓴 글만 수정 · 삭제할 수 있습니다.” (403)</td></tr><tr><td>11</td><td>Local Storage의 <code>accessToken</code> 한 글자 바꾸고 글쓰기 → 등록</td><td>“로그인이 필요합니다.” → 로그인 화면 (401)</td></tr></tbody></table><h3 class="part">12-2. 자주 만나는 오류</h3><div class="warn"><span class="lbl">⚠️ 자주 만나는 오류</span> <ul style="margin:0"><li><b>blocked by CORS policy</b> — <code>SecurityConfig</code>에 <code>.cors(Customizer.withDefaults())</code>가 없거나 <code>setAllowedOrigins</code>의 주소(포트)가 다르다. Vite가 5174 등 다른 포트로 떴는지 확인.</li><li><b>Network Error / ERR_CONNECTION_REFUSED</b> — Spring Boot 서버가 꺼져 있다 (8080).</li><li><b>로그인했는데 글 등록이 401</b> — 요청 헤더에 <code>Authorization</code>이 없다. <code>api.ts</code>의 요청 인터셉터, <code>localStorage</code> 키 이름(<code>accessToken</code>)이 저장 · 읽기에서 같은지 확인.</li><li><b>서버 실행 시 WeakKeyException</b> — <code>jwt.secret</code>이 32바이트보다 짧다.</li><li><b>Could not resolve placeholder 'jwt.secret'</b> — application.yml의 <code>jwt:</code> 들여쓰기 오류 또는 키 이름 오타.</li><li><b>403인데 message가 없다</b> — <code>PostService</code>가 <code>java.nio.file.AccessDeniedException</code>을 import 했다(6장 10-1 주의).</li><li><b>is a type and must be imported using a type-only import</b> — 타입은 <code>import type</code>으로 가져온다(7단원).</li><li><b>새로고침했더니 404</b> — Vite 개발 서버는 문제없다. 배포 서버에서는 모든 주소를 <code>index.html</code>로 돌려주는 설정이 필요하다.</li></ul></div><div class="concept"><h3 class="blk">📖 더 해 보기</h3><ul><li><b>리프레시 토큰</b> — 액세스 토큰은 짧게(30분), 리프레시 토큰은 길게(2주) 발급하고 만료되면 자동으로 새로 받기</li><li>목록 <b>페이징</b> — 서버 <code>Pageable</code> + 화면 페이지 번호</li><li>서버 주소를 <code>.env</code>의 <code>VITE_API_URL</code>로 빼서 배포 환경과 나누기</li><li><code>Post</code> → <code>User</code> <b>연관관계(@ManyToOne)</b>로 바꿔 글쓴이 닉네임 표시</li></ul></div></section>
+  
+</div>
+<footer>게시판 React UI (boardweb) · 학습 교안</footer>
+</body>
+</html>
